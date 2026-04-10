@@ -6,20 +6,19 @@ __pycache__/
 *.pyc
 
 # Project 1 generated xv6 artifacts
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/*.o
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/*.d
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/*.asm
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/*.sym
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/bootblock
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/initcode
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/initcode.out
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/kernel
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/kernelmemfs
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/fs.img
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/xv6.img
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/xv6memfs.img
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/mkfs
-G20_Project1_xv6CustomizeSystemCalls/xv6-public/.gdbinit
+G20_Project1_xv6CustomizeSystemCalls/kernel/*.o
+G20_Project1_xv6CustomizeSystemCalls/kernel/*.d
+G20_Project1_xv6CustomizeSystemCalls/kernel/*.asm
+G20_Project1_xv6CustomizeSystemCalls/kernel/*.sym
+G20_Project1_xv6CustomizeSystemCalls/user/*.o
+G20_Project1_xv6CustomizeSystemCalls/user/*.d
+G20_Project1_xv6CustomizeSystemCalls/user/*.asm
+G20_Project1_xv6CustomizeSystemCalls/user/*.sym
+G20_Project1_xv6CustomizeSystemCalls/user/usys.S
+G20_Project1_xv6CustomizeSystemCalls/kernel/kernel
+G20_Project1_xv6CustomizeSystemCalls/fs.img
+G20_Project1_xv6CustomizeSystemCalls/mkfs/mkfs
+G20_Project1_xv6CustomizeSystemCalls/.gdbinit
 
 # Project 2 build/output artifacts
 G20_Project2_2_AdvancedSchedulingAlgorithms/bin/scheduler_sim

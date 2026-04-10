@@ -1,12 +1,12 @@
 # G20 Team Execution Guide
 
-This guide is the working contract for the whole group. Follow it strictly so the repo stays clean and everyone's contribution is visible.
+This guide is the shared execution contract for the whole group. Follow it strictly so the repo stays clean and each person's contribution is visible in code, commits, and viva.
 
 ## Common Rules
 
 ### Repo Structure
 
-- Keep all xv6 work inside `G20_Project1_xv6CustomizeSystemCalls/`.
+- Keep all xv6-riscv work inside `G20_Project1_xv6CustomizeSystemCalls/`.
 - Keep all scheduling simulator work inside `G20_Project2_2_AdvancedSchedulingAlgorithms/`.
 - Do not create extra top-level folders.
 - Add documentation next to the project it belongs to.
@@ -18,7 +18,7 @@ This guide is the working contract for the whole group. Follow it strictly so th
 - Keep advanced logic only where it clearly improves marks, comparison quality, or clarity.
 - Avoid dead code, commented-out blocks, and duplicate helpers.
 - Use comments only when the kernel or scheduler logic is non-obvious.
-- Preserve xv6 x86 naming and conventions in Project 1. Do not introduce any RISC-V-specific code or filenames.
+- Preserve xv6-riscv naming and conventions in Project 1. Do not introduce x86-specific files or APIs.
 - Keep Project 2 interfaces stable once merged: CLI flags, workload schema, metrics CSV names, and output layout should not change without discussion.
 
 ### PR Rules
@@ -26,11 +26,7 @@ This guide is the working contract for the whole group. Follow it strictly so th
 - Work only on your assigned branch.
 - Do not force-push to `main`.
 - Keep PRs text-only. Do not add screenshots to pull requests.
-- Every PR description must include:
-  - scope of the change
-  - exact files touched
-  - build/test commands run
-  - what behavior changed
+- Every PR description must include scope, exact files touched, test commands run, and what behavior changed.
 - Each person updates documentation for their own contribution before requesting merge.
 
 ### Merge Order
@@ -42,14 +38,16 @@ This guide is the working contract for the whole group. Follow it strictly so th
 
 ### Validation Notes
 
-- The current Mac does not have the required xv6 x86 toolchain or QEMU setup.
-- Project 1 code can be written now, but xv6 runtime validation will happen later on Ubuntu VM or lab Linux.
-- Required Linux packages for Project 1 validation:
+- The current Mac does not have `qemu-system-riscv64` or a RISC-V cross-compiler installed.
+- Project 1 code can be written now, but runtime validation will happen later on Ubuntu VM or lab Linux.
+- Recommended Project 1 Linux packages:
   - `build-essential`
-  - `gdb`
-  - `gcc-multilib`
-  - `qemu-system-x86`
-- Project 2 can be built locally on macOS right away.
+  - `bc`
+  - `gdb-multiarch`
+  - `qemu-system-misc`
+  - `gcc-riscv64-linux-gnu`
+  - `binutils-riscv64-linux-gnu`
+- Project 2 can still be built locally on macOS right away.
 
 ## Branch Plan
 
@@ -69,16 +67,17 @@ This guide is the working contract for the whole group. Follow it strictly so th
 
 ### Project 1 Files
 
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.h`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.c`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/trap.c`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/defs.h`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/syscall.h`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/syscall.c`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/sysproc.c`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/user.h`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/usys.S`
-- `G20_Project1_xv6CustomizeSystemCalls/xv6-public/signaldemo.c`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.h`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.c`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/trap.c`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/defs.h`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/syscall.h`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/syscall.c`
+- `G20_Project1_xv6CustomizeSystemCalls/kernel/sysproc.c`
+- `G20_Project1_xv6CustomizeSystemCalls/user/user.h`
+- `G20_Project1_xv6CustomizeSystemCalls/user/usys.pl`
+- `G20_Project1_xv6CustomizeSystemCalls/user/signaldemo.c`
+- `G20_Project1_xv6CustomizeSystemCalls/Makefile`
 - Project 1 README/docs updates for the signal feature
 
 ### Project 2 Files
@@ -100,25 +99,25 @@ make
 ./bin/scheduler_sim --algo custom --cpus 4 --input data/workloads/sample_mixed.csv --output-dir out/sample_run
 
 # Later on Ubuntu or lab Linux
-cd ../G20_Project1_xv6CustomizeSystemCalls/xv6-public
-make qemu-nox
+cd ../G20_Project1_xv6CustomizeSystemCalls
+make qemu
 ```
 
 ### Definition Of Done
 
-- Project 1 x86 signal code is wired into the real syscall, process, and trap paths.
+- Project 1 RISC-V signal code is wired into the real syscall, process, and trap paths.
 - `sigalarm` installs the user handler and periodic alarm interval.
-- `sigreturn` restores the saved trapframe cleanly.
+- `sigreturn` restores the saved RISC-V trapframe cleanly.
 - `sigsend` queues a software signal for another process.
 - Project 2 foundation builds on macOS.
-- `custom` runs on the sample workload and writes summary/CSV output.
+- `custom` runs on the sample workload and writes summary, timeline, and CSV output.
 
 ### Viva Points
 
-- Explain how xv6 x86 returns to user mode through the saved trapframe.
+- Explain how xv6-riscv returns to user mode using `usertrap()` and the saved trapframe.
 - Explain why `sigreturn` must restore the earlier trapframe rather than only clearing a flag.
 - Explain how `custom` uses affinity, aging, and work stealing together.
-- Explain what parts are intentionally postponed until the x86 environment is ready.
+- Explain what parts are intentionally postponed until the RISC-V environment is ready.
 
 ### Integration Guardrails
 
@@ -135,11 +134,12 @@ make qemu-nox
 ### Expected Files
 
 - Project 1:
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/sysproc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/user.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/usys.S`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/sysproc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/defs.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/user.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/usys.pl`
   - one user demo program
 - Project 2:
   - `G20_Project2_2_AdvancedSchedulingAlgorithms/src/schedulers/mlfq.c`
@@ -155,7 +155,7 @@ make
 
 ### Definition Of Done
 
-- `clone` and `join` work through xv6 x86 process/thread control paths.
+- `clone` and `join` work through xv6-riscv process and trap control paths.
 - `mlfq` implements 3 queues with quantums `2/4/8`.
 - Periodic priority boost is visible in code and output behavior.
 
@@ -179,11 +179,12 @@ make
 ### Expected Files
 
 - Project 1:
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/sysproc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/user.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/usys.S`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/sysproc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/defs.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/user.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/usys.pl`
   - one user demo program
 - Project 2:
   - `G20_Project2_2_AdvancedSchedulingAlgorithms/src/schedulers/lottery.c`
@@ -199,7 +200,7 @@ make
 
 ### Definition Of Done
 
-- mailbox message delivery works in xv6 x86 with clear ownership semantics
+- mailbox message delivery works in xv6-riscv with clear ownership semantics
 - lottery scheduling is deterministic under the fixed seed and uses ticket counts from the workload
 
 ### Viva Points
@@ -222,11 +223,12 @@ make
 ### Expected Files
 
 - Project 1:
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/sysproc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/user.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/usys.S`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/sysproc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/defs.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/user.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/usys.pl`
   - one user demo program
 - Project 2:
   - `G20_Project2_2_AdvancedSchedulingAlgorithms/src/schedulers/edf.c`
@@ -242,7 +244,7 @@ make
 
 ### Definition Of Done
 
-- semaphore operations are safe enough for the xv6 x86 teaching kernel
+- semaphore operations are safe enough for the xv6-riscv teaching kernel
 - EDF chooses the earliest deadline among ready tasks and reports deadline misses
 
 ### Viva Points
@@ -265,11 +267,12 @@ make
 ### Expected Files
 
 - Project 1:
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/sysproc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/user.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/usys.S`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/sysproc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/defs.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/user.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/usys.pl`
   - one user demo program
 - Project 2:
   - `G20_Project2_2_AdvancedSchedulingAlgorithms/data/workloads/*.csv`
@@ -286,7 +289,7 @@ make
 
 ### Definition Of Done
 
-- priority syscalls change process metadata cleanly in xv6 x86
+- priority syscalls change process metadata cleanly in xv6-riscv
 - at least four workloads exist and each one highlights a different scheduler behavior
 - documented metrics match the generated CSV output
 
@@ -310,11 +313,12 @@ make
 ### Expected Files
 
 - Project 1:
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/proc.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/sysproc.c`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/user.h`
-  - `G20_Project1_xv6CustomizeSystemCalls/xv6-public/usys.S`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/proc.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/sysproc.c`
+  - `G20_Project1_xv6CustomizeSystemCalls/kernel/defs.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/user.h`
+  - `G20_Project1_xv6CustomizeSystemCalls/user/usys.pl`
   - one user demo program
 - Project 2:
   - `G20_Project2_2_AdvancedSchedulingAlgorithms/scripts/plot_metrics.py`
@@ -333,7 +337,7 @@ python3 scripts/plot_metrics.py out/final_run/comparison.csv
 
 ### Definition Of Done
 
-- wait/runtime reporting works in xv6 x86 once the environment is ready
+- wait/runtime reporting works in xv6-riscv once the environment is ready
 - graph generation consumes the generated CSV files without manual edits
 - documentation includes execution flow, observations, and final screenshot placeholders
 

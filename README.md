@@ -4,15 +4,15 @@ This repository contains the two required submissions for the NSCS210/CSC211 Ope
 
 ## Repository Layout
 
-- `G20_Project1_xv6CustomizeSystemCalls/`: xv6 x86 customization work based on `mit-pdos/xv6-public`
+- `G20_Project1_xv6CustomizeSystemCalls/`: xv6-riscv customization work based on `mit-pdos/xv6-riscv`
 - `G20_Project2_2_AdvancedSchedulingAlgorithms/`: multiprocessor scheduling simulator with multiple algorithms
 - `TEAM_EXECUTION_GUIDE.md`: member-by-member ownership, branch plan, build steps, and integration rules
 
 ## Current Status
 
-- Project 1 scaffolding is vendored from the xv6 x86 codebase and includes Sreenandan's signal/alarm implementation area.
+- Project 1 scaffolding is vendored from the xv6-riscv codebase and includes Sreenandan's signal/alarm implementation area.
 - Project 2 includes the simulator foundation, a working `custom` scheduler base, and placeholders for the remaining algorithms.
-- xv6 validation is intentionally deferred until the project is built on an Ubuntu or lab Linux environment with x86 tooling.
+- xv6-riscv validation is intentionally deferred until the project is built on an Ubuntu or lab Linux environment with the RISC-V toolchain.
 
 ## Quick Start
 
@@ -21,9 +21,18 @@ This repository contains the two required submissions for the NSCS210/CSC211 Ope
 Project 1 must be built in an Ubuntu or lab Linux environment with:
 
 - `build-essential`
-- `gdb`
-- `gcc-multilib`
-- `qemu-system-x86`
+- `bc`
+- `gdb-multiarch`
+- `qemu-system-misc`
+- `gcc-riscv64-linux-gnu`
+- `binutils-riscv64-linux-gnu`
+
+Typical run:
+
+```bash
+cd G20_Project1_xv6CustomizeSystemCalls
+make qemu
+```
 
 See `TEAM_EXECUTION_GUIDE.md` for the exact ownership split and workflow.
 
