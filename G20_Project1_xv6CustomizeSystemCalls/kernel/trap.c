@@ -66,7 +66,6 @@ usertrap(void)
     intr_on();
 
     syscall();
-    signalcheck(p);
   } else if((which_dev = devintr()) != 0){
     // ok
     if(which_dev == 2)
@@ -89,7 +88,7 @@ usertrap(void)
 
   signalcheck(p);
 
-  prepare_return();
+  usertrapret();
 
   // the user page table to switch to, for trampoline.S
   uint64 satp = MAKE_SATP(p->pagetable);
@@ -102,7 +101,7 @@ usertrap(void)
 // set up trapframe and control registers for a return to user space
 //
 void
-prepare_return(void)
+usertrapret(void)
 {
   struct proc *p = myproc();
 

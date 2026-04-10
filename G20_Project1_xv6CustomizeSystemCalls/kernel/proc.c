@@ -57,6 +57,7 @@ procinit(void)
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
       p->signal_handler = 0;
+      p->signal_registered = 0;
       p->alarm_interval = 0;
       p->alarm_elapsed = 0;
       p->pending_signal = 0;
@@ -133,6 +134,7 @@ found:
   p->pid = allocpid();
   p->state = USED;
   p->signal_handler = 0;
+  p->signal_registered = 0;
   p->alarm_interval = 0;
   p->alarm_elapsed = 0;
   p->pending_signal = 0;
@@ -184,6 +186,7 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->signal_handler = 0;
+  p->signal_registered = 0;
   p->alarm_interval = 0;
   p->alarm_elapsed = 0;
   p->pending_signal = 0;
@@ -304,6 +307,7 @@ kfork(void)
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
   np->signal_handler = p->signal_handler;
+  np->signal_registered = p->signal_registered;
   np->alarm_interval = p->alarm_interval;
   np->alarm_elapsed = 0;
   np->pending_signal = 0;
@@ -560,7 +564,7 @@ forkret(void)
   }
 
   // return to user space, mimicing usertrap()'s return.
-  prepare_return();
+  usertrapret();
   uint64 satp = MAKE_SATP(p->pagetable);
   uint64 trampoline_userret = TRAMPOLINE + (userret - trampoline);
   ((void (*)(uint64))trampoline_userret)(satp);
@@ -642,7 +646,7 @@ kkill(int pid)
 static int
 setupsignal(struct proc *p, int signum)
 {
-  if(p == 0 || p->signal_handler == 0 || p->signal_inflight || signum <= 0)
+  if(p == 0 || !p->signal_registered || p->signal_inflight || signum <= 0)
     return -1;
 
   memmove(&p->signal_tf, p->trapframe, sizeof(*p->trapframe));
@@ -671,11 +675,13 @@ sigalarm(int ticks, uint64 handler)
   p->alarm_interval = ticks;
   p->alarm_elapsed = 0;
   p->signal_handler = handler;
-  if(ticks == 0 && handler == 0){
+  p->signal_registered = !(ticks == 0 && handler == 0);
+  if(!p->signal_registered){
     p->pending_signal = 0;
-    p->active_signal = 0;
-    p->signal_inflight = 0;
-    memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+    if(!p->signal_inflight){
+      p->active_signal = 0;
+      memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+    }
   }
   release(&p->lock);
   return 0;
@@ -713,7 +719,7 @@ sigsend(int pid, int signum)
   for(p = proc; p < &proc[NPROC]; p++){
     acquire(&p->lock);
     if(p->pid == pid && p->state != UNUSED){
-      if(p->signal_handler == 0 || p->pending_signal != 0){
+      if(!p->signal_registered || p->pending_signal != 0){
         release(&p->lock);
         return -1;
       }
@@ -735,7 +741,7 @@ signaltick(struct proc *p)
     return;
 
   acquire(&p->lock);
-  if(p->alarm_interval > 0 && p->signal_handler != 0 && !p->signal_inflight){
+  if(p->alarm_interval > 0 && p->signal_registered && !p->signal_inflight){
     p->alarm_elapsed++;
     if(p->alarm_elapsed >= p->alarm_interval){
       if(p->pending_signal == 0)
@@ -753,7 +759,7 @@ signalcheck(struct proc *p)
     return;
 
   acquire(&p->lock);
-  if(p->pending_signal != 0 && p->signal_handler != 0 && !p->signal_inflight){
+  if(p->pending_signal != 0 && p->signal_registered && !p->signal_inflight){
     if(setupsignal(p, p->pending_signal) < 0)
       p->killed = 1;
   }

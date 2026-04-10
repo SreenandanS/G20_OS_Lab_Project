@@ -108,6 +108,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   uint64 signal_handler;       // User-space signal/alarm handler
+  int signal_registered;       // Handler registration state, even if address is 0
   int alarm_interval;          // Alarm period in ticks
   int alarm_elapsed;           // Ticks accumulated since last alarm
   int pending_signal;          // Queued signal waiting for delivery
