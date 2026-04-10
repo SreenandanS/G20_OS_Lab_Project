@@ -86,6 +86,8 @@ int main(int argc, char **argv)
       }
       print_metrics(stdout, results[run_count].metrics.algorithm_name,
                     &results[run_count].metrics);
+      print_timeline(stdout, &results[run_count].timeline,
+                     results[run_count].metrics.algorithm_name);
       run_count++;
     }
     if (write_comparison_csv(config.output_dir, results, run_count) < 0) {
@@ -103,6 +105,7 @@ int main(int argc, char **argv)
       return 1;
     }
     print_metrics(stdout, results[0].metrics.algorithm_name, &results[0].metrics);
+    print_timeline(stdout, &results[0].timeline, results[0].metrics.algorithm_name);
     run_count = 1;
   }
 

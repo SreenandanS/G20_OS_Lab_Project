@@ -37,11 +37,17 @@ static int all_done(const ProcessRuntime procs[], int count)
   return 1;
 }
 
-static void record_timeline(Timeline *timeline, const CpuState cpus[], int tick)
+static void record_timeline(Timeline *timeline, const CpuState cpus[],
+                            const ProcessRuntime procs[], int tick)
 {
   int cpu;
   for (cpu = 0; cpu < timeline->cpu_count; cpu++) {
-    timeline->slots[(tick * timeline->cpu_count) + cpu] = cpus[cpu].running_pid;
+    int slot = cpus[cpu].running_pid;
+    if (slot >= 0) {
+      timeline->slots[(tick * timeline->cpu_count) + cpu] = procs[slot].spec.pid;
+    } else {
+      timeline->slots[(tick * timeline->cpu_count) + cpu] = -1;
+    }
   }
 }
 
@@ -295,7 +301,7 @@ int run_simulation(const Workload *workload, const SimulationConfig *config,
       }
     }
 
-    record_timeline(&result->timeline, cpus, tick);
+    record_timeline(&result->timeline, cpus, procs, tick);
 
     for (i = 0; i < config->cpu_count; i++) {
       int pid = cpus[i].running_pid;

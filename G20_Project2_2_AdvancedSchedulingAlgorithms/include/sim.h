@@ -127,6 +127,7 @@ int write_comparison_csv(const char *base_dir, const SimulationResult *results,
                          int count);
 void print_metrics(FILE *stream, const char *label,
                    const SimulationMetrics *metrics);
+void print_timeline(FILE *stream, const Timeline *timeline, const char *label);
 void free_result(SimulationResult *result);
 
 #endif

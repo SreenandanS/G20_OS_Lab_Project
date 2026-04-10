@@ -2,6 +2,8 @@
 
 This project is a lightweight multiprocessor scheduling simulator written in C. It compares multiple policies over the same workload file and generates CSV output for later graphing.
 
+It also prints an ASCII schedule view in the terminal so the execution order is easy to explain during viva.
+
 ## Supported Algorithms
 
 - `mlfq`

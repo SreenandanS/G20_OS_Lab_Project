@@ -190,6 +190,32 @@ void print_metrics(FILE *stream, const char *label, const SimulationMetrics *met
           metrics->migrations);
 }
 
+void print_timeline(FILE *stream, const Timeline *timeline, const char *label)
+{
+  int cpu;
+  int tick;
+
+  fprintf(stream, "\nSchedule view for %s\n", label);
+  for (cpu = 0; cpu < timeline->cpu_count; cpu++) {
+    fprintf(stream, "CPU%-2d |", cpu);
+    for (tick = 0; tick < timeline->tick_count; tick++) {
+      int pid = timeline->slots[(tick * timeline->cpu_count) + cpu];
+      if (pid >= 0) {
+        fprintf(stream, " P%-2d", pid);
+      } else {
+        fprintf(stream, " -- ");
+      }
+    }
+    fprintf(stream, "\n");
+  }
+
+  fprintf(stream, "Tick  |");
+  for (tick = 0; tick < timeline->tick_count; tick++) {
+    fprintf(stream, " %-3d", tick);
+  }
+  fprintf(stream, "\n");
+}
+
 void free_result(SimulationResult *result)
 {
   free(result->timeline.slots);
