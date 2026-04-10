@@ -18,14 +18,16 @@ This repository contains the two required submissions for the NSCS210/CSC211 Ope
 
 ### Project 1
 
-Project 1 must be built in an Ubuntu or lab Linux environment with:
+Project 1 must be built against the official xv6-riscv toolchain setup in an Ubuntu or lab Linux environment. Upstream xv6-riscv expects a RISC-V newlib toolchain such as `riscv64-unknown-elf-gcc` and QEMU with `riscv64-softmmu`.
+
+Typical Linux package route:
 
 - `build-essential`
 - `bc`
 - `gdb-multiarch`
 - `qemu-system-misc`
-- `gcc-riscv64-linux-gnu`
-- `binutils-riscv64-linux-gnu`
+- `gcc-riscv64-unknown-elf`
+- `binutils-riscv64-unknown-elf`
 
 Typical run:
 

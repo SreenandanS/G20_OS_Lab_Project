@@ -10,14 +10,14 @@ This project extends the RISC-V version of `mit-pdos/xv6-riscv` with six feature
 
 ## Important Note
 
-The current development machine is macOS arm64 and does not have the xv6-riscv toolchain installed. The code is organized now, but final build/run verification must happen later on Ubuntu or lab Linux with:
+The current development machine is macOS arm64 and does not have the official xv6-riscv toolchain installed. The upstream repository expects a RISC-V newlib toolchain such as `riscv64-unknown-elf-gcc` together with QEMU `riscv64-softmmu`. The code is organized now, but final build/run verification must happen later on Ubuntu or lab Linux with:
 
 - `build-essential`
 - `bc`
 - `gdb-multiarch`
 - `qemu-system-misc`
-- `gcc-riscv64-linux-gnu`
-- `binutils-riscv64-linux-gnu`
+- `gcc-riscv64-unknown-elf`
+- `binutils-riscv64-unknown-elf`
 
 Later validation command:
 

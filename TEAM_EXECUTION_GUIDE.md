@@ -38,15 +38,16 @@ This guide is the shared execution contract for the whole group. Follow it stric
 
 ### Validation Notes
 
-- The current Mac does not have `qemu-system-riscv64` or a RISC-V cross-compiler installed.
+- The current Mac does not have `qemu-system-riscv64` or the upstream xv6-riscv `riscv64-unknown-elf` toolchain installed.
 - Project 1 code can be written now, but runtime validation will happen later on Ubuntu VM or lab Linux.
 - Recommended Project 1 Linux packages:
   - `build-essential`
   - `bc`
   - `gdb-multiarch`
   - `qemu-system-misc`
-  - `gcc-riscv64-linux-gnu`
-  - `binutils-riscv64-linux-gnu`
+  - `gcc-riscv64-unknown-elf`
+  - `binutils-riscv64-unknown-elf`
+- This matches the official `mit-pdos/xv6-riscv` expectation of a RISC-V newlib toolchain and QEMU for `riscv64-softmmu`.
 - Project 2 can still be built locally on macOS right away.
 
 ## Branch Plan
