@@ -2,6 +2,15 @@
 
 This project extends the RISC-V version of `mit-pdos/xv6-riscv` with six feature groups distributed across the team.
 
+## Team Members
+
+- Sreenandan Shashidharan
+- Sukrat Singh Kushwaha
+- Sura Manohar Sagar
+- Suraj Kumar Prajapati
+- Suryansh Kulshreshtha
+- T Mokshitha
+
 ## Scope
 
 - Base kernel: xv6-riscv from `mit-pdos/xv6-riscv`
@@ -34,3 +43,12 @@ Sreenandan owns:
 - `sigsend(int pid, int signum)`
 
 These additions are designed for xv6-riscv trapframe-based delivery and are implemented inside the real kernel syscall and trap paths.
+
+## Team Split
+
+- Sreenandan Shashidharan: `sigalarm`, `sigreturn`, `sigsend`
+- Sukrat Singh Kushwaha: `clone`, `join`
+- Sura Manohar Sagar: `msgsend`, `msgrecv`
+- Suraj Kumar Prajapati: `sem_init`, `sem_wait`, `sem_post`
+- Suryansh Kulshreshtha: `forkprio`, `setpriority`, `getpriority`
+- T Mokshitha: `waitx`, `getpinfo`

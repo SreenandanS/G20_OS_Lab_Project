@@ -4,6 +4,24 @@ This project is a lightweight multiprocessor scheduling simulator written in C. 
 
 It also prints an ASCII schedule view in the terminal so the execution order is easy to explain during viva.
 
+## Team Members
+
+- Sreenandan Shashidharan
+- Sukrat Singh Kushwaha
+- Sura Manohar Sagar
+- Suraj Kumar Prajapati
+- Suryansh Kulshreshtha
+- T Mokshitha
+
+## Team Split
+
+- Sreenandan Shashidharan: simulator foundation and `custom`
+- Sukrat Singh Kushwaha: `mlfq`
+- Sura Manohar Sagar: `lottery`
+- Suraj Kumar Prajapati: `edf`
+- Suryansh Kulshreshtha: workloads and metrics validation
+- T Mokshitha: plots, screenshots, and final documentation
+
 ## Supported Algorithms
 
 - `mlfq`

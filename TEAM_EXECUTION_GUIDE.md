@@ -11,6 +11,12 @@ This guide is the shared execution contract for the whole group. Follow it stric
 - Do not create extra top-level folders.
 - Add documentation next to the project it belongs to.
 
+### Documentation Sync
+
+- Keep the team member list present and identical in `README.md`, `G20_Project1_xv6CustomizeSystemCalls/README.md`, and `G20_Project2_2_AdvancedSchedulingAlgorithms/README.md`.
+- Update the relevant project README whenever behavior, CLI usage, owned feature scope, or setup steps change.
+- Do not edit the upstream xv6 `README`; keep our project-specific notes in `README.md` files and `docs/`.
+
 ### Code Standards
 
 - Keep code neat, clean, minimal, and directly tied to the requirement.
@@ -27,7 +33,7 @@ This guide is the shared execution contract for the whole group. Follow it stric
 - Do not force-push to `main`.
 - Keep PRs text-only. Do not add screenshots to pull requests.
 - Every PR description must include scope, exact files touched, test commands run, and what behavior changed.
-- Each person updates documentation for their own contribution before requesting merge.
+- Each person updates documentation for their own contribution before requesting merge, including the relevant project README when needed.
 
 ### Merge Order
 

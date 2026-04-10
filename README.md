@@ -2,6 +2,15 @@
 
 This repository contains the two required submissions for the NSCS210/CSC211 Operating Systems Lab.
 
+## Team Members
+
+- Sreenandan Shashidharan
+- Sukrat Singh Kushwaha
+- Sura Manohar Sagar
+- Suraj Kumar Prajapati
+- Suryansh Kulshreshtha
+- T Mokshitha
+
 ## Repository Layout
 
 - `G20_Project1_xv6CustomizeSystemCalls/`: xv6-riscv customization work based on `mit-pdos/xv6-riscv`
@@ -13,6 +22,7 @@ This repository contains the two required submissions for the NSCS210/CSC211 Ope
 - Project 1 scaffolding is vendored from the xv6-riscv codebase and includes Sreenandan's signal/alarm implementation area.
 - Project 2 includes the simulator foundation, a working `custom` scheduler base, and placeholders for the remaining algorithms.
 - xv6-riscv validation is intentionally deferred until the project is built on an Ubuntu or lab Linux environment with the RISC-V toolchain.
+- Each project README is maintained alongside the code so ownership and usage stay easy to follow.
 
 ## Quick Start
 
