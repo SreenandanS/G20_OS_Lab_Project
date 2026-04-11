@@ -23,3 +23,6 @@
 #define SYS_sigalarm 22
 #define SYS_sigreturn 23
 #define SYS_sigsend 24
+#define SYS_forkprio 25
+#define SYS_setpriority 26
+#define SYS_getpriority 27

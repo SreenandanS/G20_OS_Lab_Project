@@ -29,6 +29,15 @@ sys_fork(void)
 }
 
 uint64
+sys_forkprio(void)
+{
+  int priority;
+
+  argint(0, &priority);
+  return kforkprio(priority);
+}
+
+uint64
 sys_wait(void)
 {
   uint64 p;
@@ -134,4 +143,24 @@ sys_sigsend(void)
   argint(0, &pid);
   argint(1, &signum);
   return sigsend(pid, signum);
+}
+
+uint64
+sys_setpriority(void)
+{
+  int pid;
+  int priority;
+
+  argint(0, &pid);
+  argint(1, &priority);
+  return setpriority(pid, priority);
+}
+
+uint64
+sys_getpriority(void)
+{
+  int pid;
+
+  argint(0, &pid);
+  return getpriority(pid);
 }

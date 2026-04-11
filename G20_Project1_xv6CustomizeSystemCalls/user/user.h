@@ -31,6 +31,9 @@ int uptime(void);
 int sigalarm(int, sighandler_t);
 int sigreturn(void);
 int sigsend(int, int);
+int forkprio(int);
+int setpriority(int, int);
+int getpriority(int);
 
 // ulib.c
 int stat(const char*, struct stat*);

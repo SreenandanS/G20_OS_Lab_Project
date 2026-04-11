@@ -52,3 +52,44 @@ These additions are designed for xv6-riscv trapframe-based delivery and are impl
 - Suraj Kumar Prajapati: `sem_init`, `sem_wait`, `sem_post`
 - Suryansh Kulshreshtha: `forkprio`, `setpriority`, `getpriority`
 - T Mokshitha: `waitx`, `getpinfo`
+
+## Suryansh's Feature
+
+Suryansh owns the priority metadata syscall set:
+
+- `forkprio(int priority)`: fork a child and set child priority metadata at creation.
+- `setpriority(int pid, int priority)`: update an existing process's priority metadata.
+- `getpriority(int pid)`: fetch process priority metadata.
+
+### Semantics
+
+- Priority metadata range is `0..100`.
+- Default priority for new processes is `50`.
+- `fork()` keeps parent priority in child.
+- `forkprio()` overrides child priority with caller-supplied value.
+- `setpriority()` and `getpriority()` return `-1` for invalid `pid` or invalid priority input.
+
+### Files Updated For This Feature
+
+- `kernel/proc.h` (process metadata field)
+- `kernel/proc.c` (priority logic, `kforkprio`, `setpriority`, `getpriority`)
+- `kernel/defs.h` (kernel declarations)
+- `kernel/sysproc.c` (syscall handlers)
+- `kernel/syscall.h` and `kernel/syscall.c` (syscall number and dispatch wiring)
+- `user/user.h` and `user/usys.pl` (userspace ABI)
+- `user/prioritydemo.c` (userspace demo)
+
+### Demo Program
+
+`prioritydemo` shows:
+
+1. Parent reading its own priority.
+2. Child created with `forkprio(30)`.
+3. Child mutating metadata via `setpriority(..., 80)`.
+4. Parent reading child metadata via `getpriority(child_pid)` before wait.
+
+Run inside xv6 shell:
+
+```bash
+prioritydemo
+```

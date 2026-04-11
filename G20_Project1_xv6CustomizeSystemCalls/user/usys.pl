@@ -45,3 +45,6 @@ entry("uptime");
 entry("sigalarm");
 entry("sigreturn");
 entry("sigsend");
+entry("forkprio");
+entry("setpriority");
+entry("getpriority");

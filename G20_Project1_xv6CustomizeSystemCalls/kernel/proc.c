@@ -18,6 +18,17 @@ struct spinlock pid_lock;
 extern void forkret(void);
 static void freeproc(struct proc *p);
 static int setupsignal(struct proc *p, int signum);
+static int fork_with_priority(int priority);
+
+#define DEFAULT_PRIORITY 50
+#define MIN_PRIORITY 0
+#define MAX_PRIORITY 100
+
+static int
+priority_valid(int priority)
+{
+  return priority >= MIN_PRIORITY && priority <= MAX_PRIORITY;
+}
 
 extern char trampoline[]; // trampoline.S
 
@@ -58,6 +69,7 @@ procinit(void)
       p->kstack = KSTACK((int) (p - proc));
       p->signal_handler = 0;
       p->signal_registered = 0;
+      p->priority = DEFAULT_PRIORITY;
       p->alarm_interval = 0;
       p->alarm_elapsed = 0;
       p->pending_signal = 0;
@@ -135,6 +147,7 @@ found:
   p->state = USED;
   p->signal_handler = 0;
   p->signal_registered = 0;
+  p->priority = DEFAULT_PRIORITY;
   p->alarm_interval = 0;
   p->alarm_elapsed = 0;
   p->pending_signal = 0;
@@ -187,6 +200,7 @@ freeproc(struct proc *p)
   p->xstate = 0;
   p->signal_handler = 0;
   p->signal_registered = 0;
+  p->priority = DEFAULT_PRIORITY;
   p->alarm_interval = 0;
   p->alarm_elapsed = 0;
   p->pending_signal = 0;
@@ -284,6 +298,20 @@ growproc(int n)
 int
 kfork(void)
 {
+  return fork_with_priority(myproc()->priority);
+}
+
+int
+kforkprio(int priority)
+{
+  if(!priority_valid(priority))
+    return -1;
+  return fork_with_priority(priority);
+}
+
+static int
+fork_with_priority(int priority)
+{
   int i, pid;
   struct proc *np;
   struct proc *p = myproc();
@@ -308,6 +336,7 @@ kfork(void)
   np->trapframe->a0 = 0;
   np->signal_handler = p->signal_handler;
   np->signal_registered = p->signal_registered;
+  np->priority = priority;
   np->alarm_interval = p->alarm_interval;
   np->alarm_elapsed = 0;
   np->pending_signal = 0;
@@ -336,6 +365,46 @@ kfork(void)
   release(&np->lock);
 
   return pid;
+}
+
+int
+setpriority(int pid, int priority)
+{
+  struct proc *p;
+
+  if(!priority_valid(priority))
+    return -1;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->pid == pid && p->state != UNUSED){
+      p->priority = priority;
+      release(&p->lock);
+      return 0;
+    }
+    release(&p->lock);
+  }
+
+  return -1;
+}
+
+int
+getpriority(int pid)
+{
+  struct proc *p;
+  int priority;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->pid == pid && p->state != UNUSED){
+      priority = p->priority;
+      release(&p->lock);
+      return priority;
+    }
+    release(&p->lock);
+  }
+
+  return -1;
 }
 
 // Pass p's abandoned children to init.
