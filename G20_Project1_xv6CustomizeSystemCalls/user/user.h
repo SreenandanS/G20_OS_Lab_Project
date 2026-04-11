@@ -31,6 +31,8 @@ int uptime(void);
 int sigalarm(int, sighandler_t);
 int sigreturn(void);
 int sigsend(int, int);
+int msgsend(int, char*);
+int msgrecv(char*);
 
 // ulib.c
 int stat(const char*, struct stat*);

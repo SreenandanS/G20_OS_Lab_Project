@@ -115,4 +115,7 @@ struct proc {
   int active_signal;           // Signal currently being handled
   int signal_inflight;         // Non-zero while executing the handler
   struct trapframe signal_tf;  // Saved trapframe before signal delivery
+  // IPC Mailbox variables
+  char msg_buf[64];  // Buffer to store the message (64 bytes)
+  int msg_flag;      // 0 if mailbox is empty, 1 if a message is waiting
 };

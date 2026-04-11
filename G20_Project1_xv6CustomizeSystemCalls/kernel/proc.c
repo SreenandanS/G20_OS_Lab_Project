@@ -141,6 +141,8 @@ found:
   p->active_signal = 0;
   p->signal_inflight = 0;
   memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+  p->msg_flag = 0;
+  memset(p->msg_buf, 0, sizeof(p->msg_buf));
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -843,4 +845,65 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+// Send a message to a specific process by PID
+int msgsend(int pid, char *msg) {
+  struct proc *p;
+  int found = 0;
+
+  // Search through the process table for the matching PID
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->state != UNUSED && p->pid == pid) {
+      found = 1;
+      
+      // Check if the mailbox is already full
+      if(p->msg_flag == 1) {
+        release(&p->lock);
+        return -1; // Mailbox is full, return error
+      }
+
+      // Copy the message safely from user space into the kernel mailbox
+      // using copyinstr (which safely handles string copies from user to kernel)
+      if(copyinstr(myproc()->pagetable, p->msg_buf, (uint64)msg, sizeof(p->msg_buf)) < 0) {
+        release(&p->lock);
+        return -1; // Memory copy failed
+      }
+
+      // Mark mailbox as full and wake up the process if it was sleeping in msgrecv
+      p->msg_flag = 1;
+      wakeup(&p->msg_flag); 
+      
+      release(&p->lock);
+      return 0; // Success
+    }
+    release(&p->lock);
+  }
+
+  return -1; // Target PID not found
+}
+// Receive a message (blocks until a message is available)
+int msgrecv(char *buf) {
+  struct proc *p = myproc();
+
+  acquire(&p->lock);
+  
+  // Wait until a message arrives
+  while(p->msg_flag == 0) {
+    // sleep releases the lock, waits to be woken up, then reacquires the lock
+    sleep(&p->msg_flag, &p->lock);
+  }
+
+  // Copy the message safely from the kernel mailbox to user space
+  // using copyout (which safely handles copying from kernel to user)
+  if(copyout(p->pagetable, (uint64)buf, p->msg_buf, sizeof(p->msg_buf)) < 0) {
+    release(&p->lock);
+    return -1; // Memory copy failed
+  }
+
+  // Clear the mailbox for the next message
+  p->msg_flag = 0;
+  
+  release(&p->lock);
+  return 0; // Success
 }

@@ -135,3 +135,26 @@ sys_sigsend(void)
   argint(1, &signum);
   return sigsend(pid, signum);
 }
+uint64
+sys_msgsend(void)
+{
+  int pid;
+  uint64 msg_addr;
+
+  // Both return void in your version, so just call them
+  argint(0, &pid);
+  argaddr(1, &msg_addr);
+
+  return msgsend(pid, (char*)msg_addr);
+}
+
+uint64
+sys_msgrecv(void)
+{
+  uint64 buf_addr;
+
+  // argaddr returns void, so just call it
+  argaddr(0, &buf_addr);
+
+  return msgrecv((char*)buf_addr);
+}

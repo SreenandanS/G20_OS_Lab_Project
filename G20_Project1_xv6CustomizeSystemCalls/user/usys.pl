@@ -45,3 +45,5 @@ entry("uptime");
 entry("sigalarm");
 entry("sigreturn");
 entry("sigsend");
+entry("msgsend");
+entry("msgrecv");
