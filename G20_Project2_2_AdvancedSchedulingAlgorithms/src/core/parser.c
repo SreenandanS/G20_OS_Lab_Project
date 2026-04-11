@@ -1,10 +1,10 @@
+#define _GNU_SOURCE
 #include "sim.h"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 static char *trim(char *value)
 {
   char *end;

@@ -1,0 +1,5 @@
+venv/
+out/
+*.o
+*.out
+*.exe

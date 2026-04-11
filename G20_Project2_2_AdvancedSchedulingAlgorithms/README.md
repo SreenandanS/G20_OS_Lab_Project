@@ -72,3 +72,39 @@ If `matplotlib` is missing:
 ```bash
 python3 -m pip install matplotlib
 ```
+## Execution Flow
+
+1. Navigate to project directory:
+   cd G20_Project2_2_AdvancedSchedulingAlgorithms
+
+2. Build the project:
+   make
+
+3. Run scheduler simulation:
+   ./bin/scheduler_sim --algo all --cpus 4 --input data/workloads/sample_mixed.csv --output-dir out/run1
+
+4. Generate performance graphs:
+   python3 scripts/plot_metrics.py out/run1/comparison.csv
+
+5. Outputs generated:
+   - CSV file: out/run1/comparison.csv
+   - Graph: out/run1/comparison.png
+
+## Observations
+
+- MLFQ has the lowest average waiting time (~3.5), making it most responsive.
+- Lottery scheduling performs slightly worse but maintains fairness.
+- EDF has higher waiting time (~7.75) as it prioritizes deadlines.
+- Custom algorithm shows highest turnaround time (~12.5), indicating lower efficiency.
+- CPU utilization is highest (~0.70) for MLFQ, Lottery, and EDF, while Custom is lower (~0.48).
+
+## Screenshots
+
+### Terminal Execution
+![Terminal](docs/terminal.png)
+
+### CSV Output
+![CSV](docs/csv.png)
+
+### Graph Output
+![Graph](docs/comparison.png)
