@@ -131,6 +131,7 @@ UPROGS=\
 	$U/_forktest\
 	$U/_grep\
 	$U/_init\
+	$U/_ipc_demo\
 	$U/_kill\
 	$U/_ln\
 	$U/_ls\

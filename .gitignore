@@ -4,7 +4,7 @@
 # Python
 __pycache__/
 *.pyc
-
+.vscode/
 # Project 1 generated xv6 artifacts
 G20_Project1_xv6CustomizeSystemCalls/kernel/*.o
 G20_Project1_xv6CustomizeSystemCalls/kernel/*.d
