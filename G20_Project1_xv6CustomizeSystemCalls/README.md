@@ -52,3 +52,56 @@ These additions are designed for xv6-riscv trapframe-based delivery and are impl
 - Suraj Kumar Prajapati: `sem_init`, `sem_wait`, `sem_post`
 - Suryansh Kulshreshtha: `forkprio`, `setpriority`, `getpriority`
 - T Mokshitha: `waitx`, `getpinfo`
+
+## Sukrat's Feature: Lightweight Threads via `clone` / `join`
+
+Sukrat owns the `clone` and `join` system calls, which implement POSIX-style lightweight threading for xv6-riscv.
+
+### API
+
+```c
+// Spawn a thread that runs fn(arg) on the given stack.
+// Returns the new thread's pid (tid) to the caller; never returns 0.
+int clone(void (*fn)(void *), void *stack, void *arg);
+
+// Block until the thread with the given tid exits.
+// Returns the tid on success, -1 on error.
+int join(int tid);
+```
+
+### Design
+
+| Aspect | Detail |
+|--------|--------|
+| **Shared address space** | `clone()` assigns the **parent's existing `pagetable`** to the new `proc` entry — no copy-on-write, same physical pages |
+| **Separate kernel control** | Every thread gets its own `struct proc` (kernel stack, trapframe, scheduling state) so the kernel can schedule and block threads independently |
+| **Stack** | Caller allocates a page; passes the **top** of the page (RISC-V stacks grow downward). The thread's `sp` register is set to this value in the trapframe |
+| **Entry point** | `trapframe->epc` is patched to `fn`; `trapframe->a0` is set to `arg` |
+| **Cleanup** | `join()` zeroes the `proc` slot and frees only the per-thread **trapframe page**; the shared pagetable is left intact (parent owns it) |
+| **Kernel files changed** | `proc.h`, `proc.c`, `sysproc.c`, `defs.h`, `syscall.h`, `syscall.c` |
+| **Syscall numbers** | `SYS_clone = 25`, `SYS_join = 26` |
+
+### Demo program
+
+```
+$ threadtest
+threadtest: parent pid=3
+threadtest: started thread 0 with tid=4
+threadtest: started thread 1 with tid=5
+thread[0]: started (tid=4), writing result
+thread[0]: results[0] = 100, exiting
+thread[1]: started (tid=5), writing result
+thread[1]: results[1] = 200, exiting
+threadtest: joined tid0=4 (ret=4) tid1=5 (ret=5)
+threadtest: results[0]=100 results[1]=200
+threadtest: PASS - shared memory updated by threads
+```
+
+### How to run (on Ubuntu/lab Linux)
+
+```bash
+cd G20_Project1_xv6CustomizeSystemCalls
+make qemu
+# Inside xv6 shell:
+$ threadtest
+```

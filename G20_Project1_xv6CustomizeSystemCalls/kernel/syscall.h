@@ -23,3 +23,5 @@
 #define SYS_sigalarm 22
 #define SYS_sigreturn 23
 #define SYS_sigsend 24
+#define SYS_clone   25
+#define SYS_join    26

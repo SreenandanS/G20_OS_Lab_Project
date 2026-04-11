@@ -64,6 +64,8 @@ procinit(void)
       p->active_signal = 0;
       p->signal_inflight = 0;
       memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+      p->is_thread = 0;
+      p->thread_stack = 0;
   }
 }
 
@@ -141,6 +143,8 @@ found:
   p->active_signal = 0;
   p->signal_inflight = 0;
   memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+  p->is_thread = 0;
+  p->thread_stack = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -193,6 +197,8 @@ freeproc(struct proc *p)
   p->active_signal = 0;
   p->signal_inflight = 0;
   memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+  p->is_thread = 0;
+  p->thread_stack = 0;
   p->state = UNUSED;
 }
 
@@ -336,6 +342,126 @@ kfork(void)
   release(&np->lock);
 
   return pid;
+}
+
+// Clone the current process as a lightweight thread.
+// fn:    user-space function the thread should run
+// stack: top of the user-space stack page allocated by the caller
+// arg:   single argument passed to fn in a0
+// Returns the new thread's pid to the caller.
+int
+kclone(uint64 fn, uint64 stack, uint64 arg)
+{
+  int i, pid;
+  struct proc *nt;          // new thread
+  struct proc *p = myproc();
+
+  if((nt = allocproc()) == 0)
+    return -1;
+
+  // Share the parent's address space instead of copying it.
+  // The thread uses the same pagetable; sz is also shared.
+  nt->pagetable = p->pagetable;
+  nt->sz        = p->sz;
+
+  // The thread has its own trapframe (allocated by allocproc).
+  // Copy the current register state as a baseline, then patch
+  // PC -> fn, SP -> top of the provided stack, A0 -> arg.
+  *(nt->trapframe) = *(p->trapframe);
+  nt->trapframe->epc = fn;    // thread starts at fn
+  nt->trapframe->sp  = stack; // thread uses its own stack
+  nt->trapframe->a0  = arg;   // first argument
+
+  // Mark as a thread so join() handles cleanup correctly.
+  nt->is_thread    = 1;
+  nt->thread_stack = stack;   // remember stack top for reference
+
+  // Copy signal state from parent.
+  nt->signal_handler    = p->signal_handler;
+  nt->signal_registered = p->signal_registered;
+  nt->alarm_interval    = p->alarm_interval;
+  nt->alarm_elapsed     = 0;
+  nt->pending_signal    = 0;
+  nt->active_signal     = 0;
+  nt->signal_inflight   = 0;
+  memset(&nt->signal_tf, 0, sizeof(nt->signal_tf));
+
+  // Inherit open file descriptors and cwd.
+  for(i = 0; i < NOFILE; i++)
+    if(p->ofile[i])
+      nt->ofile[i] = filedup(p->ofile[i]);
+  nt->cwd = idup(p->cwd);
+
+  safestrcpy(nt->name, p->name, sizeof(p->name));
+
+  pid = nt->pid;
+
+  release(&nt->lock);
+
+  acquire(&wait_lock);
+  nt->parent = p;
+  release(&wait_lock);
+
+  acquire(&nt->lock);
+  nt->state = RUNNABLE;
+  release(&nt->lock);
+
+  return pid;
+}
+
+// Wait for a specific thread child (identified by pid) to exit.
+// Returns pid on success, -1 on failure.
+// The shared pagetable is NOT freed here; the parent process owns it.
+// Only the per-thread trapframe page is released.
+int
+kjoin(int tid)
+{
+  struct proc *pp;
+  struct proc *p = myproc();
+
+  acquire(&wait_lock);
+
+  for(;;){
+    int found = 0;
+    for(pp = proc; pp < &proc[NPROC]; pp++){
+      if(pp->parent == p && pp->pid == tid){
+        acquire(&pp->lock);
+        found = 1;
+        if(pp->state == ZOMBIE){
+          // Free only the trapframe; pagetable is shared with parent.
+          if(pp->trapframe){
+            kfree((void*)pp->trapframe);
+            pp->trapframe = 0;
+          }
+          // Clear pagetable pointer so generic freeproc() won't touch it.
+          pp->pagetable = 0;
+          pp->sz        = 0;
+          pp->pid       = 0;
+          pp->parent    = 0;
+          pp->name[0]   = 0;
+          pp->chan      = 0;
+          pp->killed    = 0;
+          pp->xstate    = 0;
+          pp->is_thread    = 0;
+          pp->thread_stack = 0;
+          pp->state     = UNUSED;
+          release(&pp->lock);
+          release(&wait_lock);
+          return tid;
+        }
+        release(&pp->lock);
+      }
+    }
+
+    // Target thread not found (wrong pid or already reaped).
+    if(!found || killed(p)){
+      release(&wait_lock);
+      return -1;
+    }
+
+    // Sleep until the thread wakes us.
+    sleep(p, &wait_lock);
+  }
 }
 
 // Pass p's abandoned children to init.

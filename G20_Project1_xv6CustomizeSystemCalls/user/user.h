@@ -31,6 +31,8 @@ int uptime(void);
 int sigalarm(int, sighandler_t);
 int sigreturn(void);
 int sigsend(int, int);
+int clone(void (*fn)(void*), void *stack, void *arg);
+int join(int);
 
 // ulib.c
 int stat(const char*, struct stat*);

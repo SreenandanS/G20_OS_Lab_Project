@@ -135,3 +135,30 @@ sys_sigsend(void)
   argint(1, &signum);
   return sigsend(pid, signum);
 }
+
+// clone(fn, stack, arg)
+// Creates a lightweight thread sharing the caller's address space.
+// fn    - user-space function for the thread to execute
+// stack - top of a user-space stack page the caller already allocated
+// arg   - the single argument passed to fn
+// Returns the new thread's pid on success, -1 on failure.
+uint64
+sys_clone(void)
+{
+  uint64 fn, stack, arg;
+  argaddr(0, &fn);
+  argaddr(1, &stack);
+  argaddr(2, &arg);
+  return kclone(fn, stack, arg);
+}
+
+// join(tid)
+// Waits for the thread with the given pid to exit.
+// Returns tid on success, -1 on failure.
+uint64
+sys_join(void)
+{
+  int tid;
+  argint(0, &tid);
+  return kjoin(tid);
+}

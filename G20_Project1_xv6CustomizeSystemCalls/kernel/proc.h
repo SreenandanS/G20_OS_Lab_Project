@@ -115,4 +115,8 @@ struct proc {
   int active_signal;           // Signal currently being handled
   int signal_inflight;         // Non-zero while executing the handler
   struct trapframe signal_tf;  // Saved trapframe before signal delivery
+
+  // clone/join: lightweight thread support
+  int is_thread;               // 1 if this proc shares parent's address space
+  uint64 thread_stack;         // user-space stack base given at clone() time
 };
