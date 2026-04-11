@@ -2,7 +2,8 @@
 
 struct stat;
 typedef void (*sighandler_t)(int);
-
+struct pinfo;
+int getpinfo(struct pinfo*);
 #define SIGUSR1 10
 #define SIGALRM 14
 
@@ -31,7 +32,7 @@ int uptime(void);
 int sigalarm(int, sighandler_t);
 int sigreturn(void);
 int sigsend(int, int);
-
+int waitx(int*, int*);
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
