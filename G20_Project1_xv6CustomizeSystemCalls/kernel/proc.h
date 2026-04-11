@@ -18,6 +18,12 @@ struct context {
   uint64 s11;
 };
 
+struct pinfo {
+  int pid[NPROC];
+  int state[NPROC];
+  int runtime[NPROC];
+  int waittime[NPROC];
+};
 // Per-CPU state.
 struct cpu {
   struct proc *proc;          // The process running on this cpu, or null.
@@ -87,7 +93,9 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 // Per-process state
 struct proc {
   struct spinlock lock;
-
+  uint rtime;   // running time
+  uint stime;   // sleeping time
+  uint retime;  // ready time
   // p->lock must be held when using these:
   enum procstate state;        // Process state
   void *chan;                  // If non-zero, sleeping on chan

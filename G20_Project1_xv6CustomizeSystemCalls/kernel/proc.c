@@ -5,7 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-
+void prepare_return(void);
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -30,6 +30,20 @@ struct spinlock wait_lock;
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
+int
+getpinfo(struct pinfo *info)
+{
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    info->pid[p - proc] = p->pid;
+    info->state[p - proc] = p->state;
+    info->runtime[p - proc] = p->rtime;
+   info->waittime[p - proc] = p->retime;
+  }
+  return 0;
+} 
+
 void
 proc_mapstacks(pagetable_t kpgtbl)
 {
@@ -140,6 +154,9 @@ found:
   p->pending_signal = 0;
   p->active_signal = 0;
   p->signal_inflight = 0;
+  p->rtime = 0;
+  p->stime = 0;
+  p->retime = 0;
   memset(&p->signal_tf, 0, sizeof(p->signal_tf));
 
   // Allocate a trapframe page.
@@ -446,6 +463,58 @@ kwait(uint64 addr)
     sleep(p, &wait_lock);  //DOC: wait-sleep
   }
 }
+int
+waitx(uint64 addr_rtime, uint64 addr_wtime)
+{
+  struct proc *pp;
+  int havekids, pid;
+  struct proc *p = myproc();
+
+  acquire(&wait_lock);
+
+  for(;;){
+    havekids = 0;
+
+    for(pp = proc; pp < &proc[NPROC]; pp++){
+      if(pp->parent == p){
+        havekids = 1;
+        acquire(&pp->lock);
+
+        if(pp->state == ZOMBIE){
+          pid = pp->pid;
+
+          // return runtime
+          if(copyout(p->pagetable, addr_rtime, (char *)&pp->rtime, sizeof(pp->rtime)) < 0){
+            release(&pp->lock);
+            release(&wait_lock);
+            return -1;
+          }
+
+          // return waiting time (retime)
+          if(copyout(p->pagetable, addr_wtime, (char *)&pp->retime, sizeof(pp->retime)) < 0){
+            release(&pp->lock);
+            release(&wait_lock);
+            return -1;
+          }
+
+          freeproc(pp);
+          release(&pp->lock);
+          release(&wait_lock);
+          return pid;
+        }
+
+        release(&pp->lock);
+      }
+    }
+
+    if(!havekids || killed(p)){
+      release(&wait_lock);
+      return -1;
+    }
+
+    sleep(p, &wait_lock);
+  }
+}
 
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -564,7 +633,7 @@ forkret(void)
   }
 
   // return to user space, mimicing usertrap()'s return.
-  usertrapret();
+  prepare_return();
   uint64 satp = MAKE_SATP(p->pagetable);
   uint64 trampoline_userret = TRAMPOLINE + (userret - trampoline);
   ((void (*)(uint64))trampoline_userret)(satp);
@@ -842,5 +911,23 @@ procdump(void)
       state = "???";
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
+  }
+}
+
+void
+update_time(void)
+{
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+
+    if(p->state == RUNNING)
+      p->rtime++;
+    else if(p->state == SLEEPING)
+      p->stime++;
+    else if(p->state == RUNNABLE)
+      p->retime++;
+
+    release(&p->lock);
   }
 }

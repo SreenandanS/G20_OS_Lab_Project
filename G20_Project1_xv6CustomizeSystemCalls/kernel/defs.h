@@ -8,7 +8,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
-
+struct pinfo;
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
@@ -101,12 +101,14 @@ void            sched(void);
 void            sleep(void*, struct spinlock*);
 void            userinit(void);
 int             kwait(uint64);
+int             waitx(uint64, uint64); 
 void            wakeup(void*);
 void            yield(void);
+void            update_time(void);
 int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
 int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
-
+int             getpinfo(struct pinfo*);
 // swtch.S
 void            swtch(struct context*, struct context*);
 

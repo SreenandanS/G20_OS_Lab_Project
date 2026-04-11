@@ -5,7 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-
+void prepare_return(void);
 struct spinlock tickslock;
 uint ticks;
 
@@ -68,8 +68,6 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
-    if(which_dev == 2)
-      signaltick(p);
   } else if((r_scause() == 15 || r_scause() == 13) &&
             vmfault(p->pagetable, r_stval(), (r_scause() == 13)? 1 : 0) != 0) {
     // page fault on lazily-allocated page
@@ -83,12 +81,11 @@ usertrap(void)
     kexit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
-    yield();
-
-  signalcheck(p);
-
-  usertrapret();
+  if(which_dev == 2){
+  update_time();        
+  yield();
+}
+  prepare_return();
 
   // the user page table to switch to, for trampoline.S
   uint64 satp = MAKE_SATP(p->pagetable);
@@ -101,7 +98,7 @@ usertrap(void)
 // set up trapframe and control registers for a return to user space
 //
 void
-usertrapret(void)
+prepare_return(void)
 {
   struct proc *p = myproc();
 
@@ -156,8 +153,12 @@ kerneltrap()
   }
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2 && myproc() != 0)
+  if(which_dev == 2){
+  update_time();     
+
+  if(myproc() != 0)
     yield();
+}
 
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
@@ -173,8 +174,9 @@ clockintr()
     ticks++;
     wakeup(&ticks);
     release(&tickslock);
+    
   }
-
+  update_time();  
   // ask for the next timer interrupt. this also clears
   // the interrupt request. 1000000 is about a tenth
   // of a second.

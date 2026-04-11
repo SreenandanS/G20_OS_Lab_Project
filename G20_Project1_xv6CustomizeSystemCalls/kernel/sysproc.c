@@ -135,3 +135,30 @@ sys_sigsend(void)
   argint(1, &signum);
   return sigsend(pid, signum);
 }
+
+uint64
+sys_waitx(void)
+{
+  uint64 rtime, wtime;
+
+  argaddr(0, &rtime);
+  argaddr(1, &wtime);
+
+  return waitx(rtime, wtime);
+}
+
+uint64
+sys_getpinfo(void)
+{
+  uint64 addr;              // user space address
+  struct pinfo info;
+
+  argaddr(0, &addr);        // get pointer from user
+
+  getpinfo(&info);          // fill kernel struct
+
+  if(copyout(myproc()->pagetable, addr, (char *)&info, sizeof(info)) < 0)
+    return -1;
+
+  return 0;
+}
