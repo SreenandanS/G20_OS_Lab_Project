@@ -29,6 +29,36 @@ Operating Systems Lab Project Submission for `NSCS210/CSC211`, Department of CSE
 
 The project includes dedicated user programs for demonstrating each feature group and a report with screenshots in the project documentation folder.
 
+## Project 1 Screenshots
+
+### Signal and Alarm Demo
+
+![Project 1 Signal Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/signaldemo.png)
+
+### Clone and Join Demo
+
+![Project 1 Thread Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/threadtest.png)
+
+### Mailbox IPC Demo
+
+![Project 1 IPC Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/ipc_demo.png)
+
+### Semaphore Demo
+
+![Project 1 Semaphore Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/semdemo.png)
+
+### Priority Demo
+
+![Project 1 Priority Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/prioritydemo.png)
+
+### waitx Demo
+
+![Project 1 waitx Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/test_waitx.png)
+
+### getpinfo Demo
+
+![Project 1 getpinfo Demo](G20_Project1_xv6CustomizeSystemCalls/screenshots/getpinfo_test.png)
+
 ## Project 2 Summary
 
 `G20_Project2_2` implements an advanced scheduling simulator for multiprocessor systems with:
@@ -39,6 +69,32 @@ The project includes dedicated user programs for demonstrating each feature grou
 - a custom affinity-aware multiprocessor scheduler (`custom`)
 
 Additional features include workload-based evaluation, ASCII schedule visualization, CSV export, migration and deadline metrics, and graph generation for comparison.
+
+## Project 2 Screenshots
+
+### Sample Mixed Workload Terminal Output
+
+![Project 2 Sample Terminal](G20_Project2_2/docs/sample_terminal.png)
+
+### Sample Mixed Workload CSV View
+
+![Project 2 Sample CSV](G20_Project2_2/docs/sample_csv.png)
+
+### Sample Mixed Workload Graph
+
+![Project 2 Sample Graph](G20_Project2_2/docs/sample_comparison.png)
+
+### Affinity Workload Terminal Output
+
+![Project 2 Affinity Terminal](G20_Project2_2/docs/affinity_terminal.png)
+
+### Affinity Workload CSV View
+
+![Project 2 Affinity CSV](G20_Project2_2/docs/affinity_csv.png)
+
+### Affinity Workload Graph
+
+![Project 2 Affinity Graph](G20_Project2_2/docs/affinity_comparison.png)
 
 ## Documentation
 

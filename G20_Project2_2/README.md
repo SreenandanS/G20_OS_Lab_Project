@@ -76,6 +76,32 @@ Each run produces:
 - affinity-aware custom scheduler
 - graph generation for key performance metrics
 
+## Result Screenshots
+
+### Terminal Schedule Output: Sample Mixed Workload
+
+![Sample Terminal](docs/sample_terminal.png)
+
+### Comparison CSV: Sample Mixed Workload
+
+![Sample CSV](docs/sample_csv.png)
+
+### Metric Graphs: Sample Mixed Workload
+
+![Sample Graph](docs/sample_comparison.png)
+
+### Terminal Schedule Output: Affinity Workload
+
+![Affinity Terminal](docs/affinity_terminal.png)
+
+### Comparison CSV: Affinity Workload
+
+![Affinity CSV](docs/affinity_csv.png)
+
+### Metric Graphs: Affinity Workload
+
+![Affinity Graph](docs/affinity_comparison.png)
+
 ## Documentation
 
 Detailed discussion, workload explanations, screenshots, and graphs are available in:

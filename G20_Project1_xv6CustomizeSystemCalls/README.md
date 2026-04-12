@@ -98,6 +98,36 @@ getpinfo_test
 - process accounting data exposed to user space
 - multiple dedicated demo programs for clearer evaluation and viva discussion
 
+## Execution Screenshots
+
+### Signal and Alarm Demonstration
+
+![Signal Demo](screenshots/signaldemo.png)
+
+### Clone and Join Demonstration
+
+![Thread Demo](screenshots/threadtest.png)
+
+### Mailbox IPC Demonstration
+
+![IPC Demo](screenshots/ipc_demo.png)
+
+### Semaphore Demonstration
+
+![Semaphore Demo](screenshots/semdemo.png)
+
+### Priority Control Demonstration
+
+![Priority Demo](screenshots/prioritydemo.png)
+
+### Runtime Accounting with `waitx`
+
+![waitx Demo](screenshots/test_waitx.png)
+
+### Process Table Snapshot with `getpinfo`
+
+![getpinfo Demo](screenshots/getpinfo_test.png)
+
 ## Documentation
 
 Detailed analysis, demo notes, and execution screenshots are available in:
