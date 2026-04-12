@@ -23,3 +23,15 @@
 #define SYS_sigalarm 22
 #define SYS_sigreturn 23
 #define SYS_sigsend 24
+#define SYS_clone 25
+#define SYS_join 26
+#define SYS_msgsend 27
+#define SYS_msgrecv 28
+#define SYS_sem_init 29
+#define SYS_sem_wait 30
+#define SYS_sem_post 31
+#define SYS_forkprio 32
+#define SYS_setpriority 33
+#define SYS_getpriority 34
+#define SYS_waitx 35
+#define SYS_getpinfo 36

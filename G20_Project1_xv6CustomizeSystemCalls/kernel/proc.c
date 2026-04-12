@@ -18,6 +18,19 @@ struct spinlock pid_lock;
 extern void forkret(void);
 static void freeproc(struct proc *p);
 static int setupsignal(struct proc *p, int signum);
+static int priority_valid(int priority);
+static int fork_with_priority(int priority);
+
+#define DEFAULT_PRIORITY 50
+#define MIN_PRIORITY 0
+#define MAX_PRIORITY 100
+#define NSEM 64
+
+struct ksem {
+  struct spinlock lock;
+  int used;
+  int value;
+};
 
 extern char trampoline[]; // trampoline.S
 
@@ -26,6 +39,30 @@ extern char trampoline[]; // trampoline.S
 // memory model when using p->parent.
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
+struct ksem semtable[NSEM];
+
+static int
+priority_valid(int priority)
+{
+  return priority >= MIN_PRIORITY && priority <= MAX_PRIORITY;
+}
+
+int
+getpinfo(struct pinfo *info)
+{
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    info->pid[p - proc] = p->pid;
+    info->state[p - proc] = p->state;
+    info->runtime[p - proc] = p->rtime;
+    info->waittime[p - proc] = p->retime;
+    release(&p->lock);
+  }
+
+  return 0;
+}
 
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
@@ -49,13 +86,18 @@ void
 procinit(void)
 {
   struct proc *p;
+  int i;
   
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
+      p->rtime = 0;
+      p->stime = 0;
+      p->retime = 0;
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
+      p->priority = DEFAULT_PRIORITY;
       p->signal_handler = 0;
       p->signal_registered = 0;
       p->alarm_interval = 0;
@@ -63,7 +105,17 @@ procinit(void)
       p->pending_signal = 0;
       p->active_signal = 0;
       p->signal_inflight = 0;
+      memset(p->msg_buf, 0, sizeof(p->msg_buf));
+      p->msg_flag = 0;
+      p->is_thread = 0;
+      p->thread_stack = 0;
       memset(&p->signal_tf, 0, sizeof(p->signal_tf));
+  }
+
+  for(i = 0; i < NSEM; i++){
+    initlock(&semtable[i].lock, "ksem");
+    semtable[i].used = 0;
+    semtable[i].value = 0;
   }
 }
 
@@ -132,7 +184,11 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
+  p->rtime = 0;
+  p->stime = 0;
+  p->retime = 0;
   p->state = USED;
+  p->priority = DEFAULT_PRIORITY;
   p->signal_handler = 0;
   p->signal_registered = 0;
   p->alarm_interval = 0;
@@ -140,6 +196,10 @@ found:
   p->pending_signal = 0;
   p->active_signal = 0;
   p->signal_inflight = 0;
+  memset(p->msg_buf, 0, sizeof(p->msg_buf));
+  p->msg_flag = 0;
+  p->is_thread = 0;
+  p->thread_stack = 0;
   memset(&p->signal_tf, 0, sizeof(p->signal_tf));
 
   // Allocate a trapframe page.
@@ -184,7 +244,11 @@ freeproc(struct proc *p)
   p->name[0] = 0;
   p->chan = 0;
   p->killed = 0;
+  p->priority = DEFAULT_PRIORITY;
   p->xstate = 0;
+  p->rtime = 0;
+  p->stime = 0;
+  p->retime = 0;
   p->signal_handler = 0;
   p->signal_registered = 0;
   p->alarm_interval = 0;
@@ -192,6 +256,10 @@ freeproc(struct proc *p)
   p->pending_signal = 0;
   p->active_signal = 0;
   p->signal_inflight = 0;
+  memset(p->msg_buf, 0, sizeof(p->msg_buf));
+  p->msg_flag = 0;
+  p->is_thread = 0;
+  p->thread_stack = 0;
   memset(&p->signal_tf, 0, sizeof(p->signal_tf));
   p->state = UNUSED;
 }
@@ -284,6 +352,20 @@ growproc(int n)
 int
 kfork(void)
 {
+  return fork_with_priority(myproc()->priority);
+}
+
+int
+kforkprio(int priority)
+{
+  if(!priority_valid(priority))
+    return -1;
+  return fork_with_priority(priority);
+}
+
+static int
+fork_with_priority(int priority)
+{
   int i, pid;
   struct proc *np;
   struct proc *p = myproc();
@@ -306,6 +388,7 @@ kfork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
+  np->priority = priority;
   np->signal_handler = p->signal_handler;
   np->signal_registered = p->signal_registered;
   np->alarm_interval = p->alarm_interval;
@@ -313,6 +396,10 @@ kfork(void)
   np->pending_signal = 0;
   np->active_signal = 0;
   np->signal_inflight = 0;
+  memset(np->msg_buf, 0, sizeof(np->msg_buf));
+  np->msg_flag = 0;
+  np->is_thread = 0;
+  np->thread_stack = 0;
   memset(&np->signal_tf, 0, sizeof(np->signal_tf));
 
   // increment reference counts on open file descriptors.
@@ -336,6 +423,97 @@ kfork(void)
   release(&np->lock);
 
   return pid;
+}
+
+int
+kclone(uint64 fn, uint64 stack, uint64 arg)
+{
+  int tid;
+  struct proc *nt;
+  struct proc *p = myproc();
+
+  if(fn >= p->sz || stack == 0 || stack >= p->sz)
+    return -1;
+
+  if((nt = allocproc()) == 0)
+    return -1;
+
+  if(uvmcopy(p->pagetable, nt->pagetable, p->sz) < 0){
+    freeproc(nt);
+    release(&nt->lock);
+    return -1;
+  }
+  nt->sz = p->sz;
+  *(nt->trapframe) = *(p->trapframe);
+  nt->trapframe->epc = fn;
+  nt->trapframe->sp = stack;
+  nt->trapframe->a0 = arg;
+  nt->priority = p->priority;
+  nt->signal_handler = p->signal_handler;
+  nt->signal_registered = p->signal_registered;
+  nt->alarm_interval = p->alarm_interval;
+  nt->alarm_elapsed = 0;
+  nt->pending_signal = 0;
+  nt->active_signal = 0;
+  nt->signal_inflight = 0;
+  memset(nt->msg_buf, 0, sizeof(nt->msg_buf));
+  nt->msg_flag = 0;
+  nt->is_thread = 1;
+  nt->thread_stack = stack;
+  memset(&nt->signal_tf, 0, sizeof(nt->signal_tf));
+
+  for(int i = 0; i < NOFILE; i++)
+    if(p->ofile[i])
+      nt->ofile[i] = filedup(p->ofile[i]);
+  nt->cwd = idup(p->cwd);
+
+  safestrcpy(nt->name, p->name, sizeof(p->name));
+  tid = nt->pid;
+
+  release(&nt->lock);
+
+  acquire(&wait_lock);
+  nt->parent = p;
+  release(&wait_lock);
+
+  acquire(&nt->lock);
+  nt->state = RUNNABLE;
+  release(&nt->lock);
+
+  return tid;
+}
+
+int
+kjoin(int tid)
+{
+  struct proc *pp;
+  struct proc *p = myproc();
+
+  acquire(&wait_lock);
+  for(;;){
+    int found = 0;
+
+    for(pp = proc; pp < &proc[NPROC]; pp++){
+      if(pp->parent == p && pp->pid == tid && pp->is_thread){
+        acquire(&pp->lock);
+        found = 1;
+        if(pp->state == ZOMBIE){
+          freeproc(pp);
+          release(&pp->lock);
+          release(&wait_lock);
+          return tid;
+        }
+        release(&pp->lock);
+      }
+    }
+
+    if(!found || killed(p)){
+      release(&wait_lock);
+      return -1;
+    }
+
+    sleep(p, &wait_lock);
+  }
 }
 
 // Pass p's abandoned children to init.
@@ -413,7 +591,7 @@ kwait(uint64 addr)
     // Scan through table looking for exited children.
     havekids = 0;
     for(pp = proc; pp < &proc[NPROC]; pp++){
-      if(pp->parent == p){
+      if(pp->parent == p && !pp->is_thread){
         // make sure the child isn't still in exit() or swtch().
         acquire(&pp->lock);
 
@@ -444,6 +622,46 @@ kwait(uint64 addr)
     
     // Wait for a child to exit.
     sleep(p, &wait_lock);  //DOC: wait-sleep
+  }
+}
+
+int
+waitx(uint64 addr_rtime, uint64 addr_wtime)
+{
+  struct proc *pp;
+  int havekids, pid;
+  struct proc *p = myproc();
+
+  acquire(&wait_lock);
+  for(;;){
+    havekids = 0;
+    for(pp = proc; pp < &proc[NPROC]; pp++){
+      if(pp->parent == p && !pp->is_thread){
+        acquire(&pp->lock);
+        havekids = 1;
+        if(pp->state == ZOMBIE){
+          pid = pp->pid;
+          if(copyout(p->pagetable, addr_rtime, (char *)&pp->rtime, sizeof(pp->rtime)) < 0 ||
+             copyout(p->pagetable, addr_wtime, (char *)&pp->retime, sizeof(pp->retime)) < 0) {
+            release(&pp->lock);
+            release(&wait_lock);
+            return -1;
+          }
+          freeproc(pp);
+          release(&pp->lock);
+          release(&wait_lock);
+          return pid;
+        }
+        release(&pp->lock);
+      }
+    }
+
+    if(!havekids || killed(p)){
+      release(&wait_lock);
+      return -1;
+    }
+
+    sleep(p, &wait_lock);
   }
 }
 
@@ -643,6 +861,112 @@ kkill(int pid)
   return -1;
 }
 
+int
+setpriority(int pid, int priority)
+{
+  struct proc *p;
+
+  if(!priority_valid(priority))
+    return -1;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->pid == pid && p->state != UNUSED){
+      p->priority = priority;
+      release(&p->lock);
+      return 0;
+    }
+    release(&p->lock);
+  }
+
+  return -1;
+}
+
+int
+getpriority(int pid)
+{
+  struct proc *p;
+  int priority;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->pid == pid && p->state != UNUSED){
+      priority = p->priority;
+      release(&p->lock);
+      return priority;
+    }
+    release(&p->lock);
+  }
+
+  return -1;
+}
+
+int
+ksem_init(int semid, int value)
+{
+  struct ksem *s;
+
+  if(semid < 0 || semid >= NSEM || value < 0)
+    return -1;
+
+  s = &semtable[semid];
+  acquire(&s->lock);
+  s->used = 1;
+  s->value = value;
+  wakeup(s);
+  release(&s->lock);
+  return 0;
+}
+
+int
+ksem_wait(int semid)
+{
+  struct ksem *s;
+
+  if(semid < 0 || semid >= NSEM)
+    return -1;
+
+  s = &semtable[semid];
+  acquire(&s->lock);
+  if(!s->used){
+    release(&s->lock);
+    return -1;
+  }
+
+  while(s->value == 0){
+    sleep(s, &s->lock);
+    if(!s->used){
+      release(&s->lock);
+      return -1;
+    }
+  }
+
+  s->value--;
+  release(&s->lock);
+  return 0;
+}
+
+int
+ksem_post(int semid)
+{
+  struct ksem *s;
+
+  if(semid < 0 || semid >= NSEM)
+    return -1;
+
+  s = &semtable[semid];
+  acquire(&s->lock);
+  if(!s->used){
+    release(&s->lock);
+    return -1;
+  }
+
+  s->value++;
+  wakeup(s);
+  release(&s->lock);
+  return 0;
+}
+
 static int
 setupsignal(struct proc *p, int signum)
 {
@@ -734,6 +1058,66 @@ sigsend(int pid, int signum)
   return -1;
 }
 
+int
+msgsend(int pid, char *msg)
+{
+  struct proc *p;
+
+  acquire(&wait_lock);
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state != UNUSED && p->pid == pid){
+      if(p->msg_flag){
+        release(&p->lock);
+        release(&wait_lock);
+        return -1;
+      }
+
+      if(copyinstr(myproc()->pagetable, p->msg_buf, (uint64)msg, sizeof(p->msg_buf)) < 0){
+        release(&p->lock);
+        release(&wait_lock);
+        return -1;
+      }
+
+      p->msg_flag = 1;
+      release(&p->lock);
+      wakeup(&p->msg_flag);
+      release(&wait_lock);
+      return 0;
+    }
+    release(&p->lock);
+  }
+
+  release(&wait_lock);
+  return -1;
+}
+
+int
+msgrecv(char *buf)
+{
+  struct proc *p = myproc();
+
+  acquire(&wait_lock);
+  acquire(&p->lock);
+  while(p->msg_flag == 0){
+    release(&p->lock);
+    sleep(&p->msg_flag, &wait_lock);
+    acquire(&p->lock);
+  }
+
+  if(copyout(p->pagetable, (uint64)buf, p->msg_buf, sizeof(p->msg_buf)) < 0){
+    release(&p->lock);
+    release(&wait_lock);
+    return -1;
+  }
+
+  p->msg_flag = 0;
+  memset(p->msg_buf, 0, sizeof(p->msg_buf));
+  release(&p->lock);
+  release(&wait_lock);
+  return 0;
+}
+
 void
 signaltick(struct proc *p)
 {
@@ -764,6 +1148,23 @@ signalcheck(struct proc *p)
       p->killed = 1;
   }
   release(&p->lock);
+}
+
+void
+update_time(void)
+{
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state == RUNNING)
+      p->rtime++;
+    else if(p->state == SLEEPING)
+      p->stime++;
+    else if(p->state == RUNNABLE)
+      p->retime++;
+    release(&p->lock);
+  }
 }
 
 void

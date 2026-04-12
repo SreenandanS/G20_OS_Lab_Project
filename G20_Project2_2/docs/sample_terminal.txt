@@ -1,0 +1,32 @@
+mlfq: waiting=3.50 turnaround=8.50 response=0.00 throughput=0.3636 util=0.7045 misses=0 migrations=5
+
+Schedule view for mlfq
+CPU0  | P1  P1  P3  P3  P4  P4  P4  P4  P4  P4  -- 
+CPU1  | --  P2  P2  P2  P3  P3  P3  P3  P3  P1  P1 
+CPU2  | --  --  P1  P1  P1  P2  P2  P1  P1  --  -- 
+CPU3  | --  --  --  --  --  --  --  P2  P2  P2  P2 
+Tick  | 0   1   2   3   4   5   6   7   8   9   10 
+lottery: waiting=4.25 turnaround=8.50 response=0.00 throughput=0.3636 util=0.7045 misses=0 migrations=4
+
+Schedule view for lottery
+CPU0  | P1  P1  P1  P1  P1  P2  P2  P2  P2  P2  P2 
+CPU1  | --  P2  P2  P2  P3  P3  P3  P3  P3  P1  P1 
+CPU2  | --  --  P3  P3  P4  P4  P4  P4  P4  P4  -- 
+CPU3  | --  --  --  --  --  --  --  P1  P1  --  -- 
+Tick  | 0   1   2   3   4   5   6   7   8   9   10 
+edf: waiting=7.75 turnaround=8.50 response=0.00 throughput=0.3636 util=0.7045 misses=0 migrations=6
+
+Schedule view for edf
+CPU0  | P1  P2  P2  P2  P4  P4  P4  P4  P4  P4  P2 
+CPU1  | --  P1  P1  P1  P1  P2  P2  P2  P2  P2  P1 
+CPU2  | --  --  P3  P3  P3  P3  P3  P1  P1  P1  -- 
+CPU3  | --  --  --  --  --  --  --  P3  P3  --  -- 
+Tick  | 0   1   2   3   4   5   6   7   8   9   10 
+custom: waiting=6.75 turnaround=12.50 response=0.75 throughput=0.2500 util=0.4844 misses=1 migrations=2
+
+Schedule view for custom
+CPU0  | P1  P1  P1  P1  P1  P3  P3  P3  P3  P4  P4  P4  P4  P3  P3  P3 
+CPU1  | --  P2  P2  P2  P4  P4  P2  P2  P2  P2  P2  P2  P1  P1  P1  P1 
+CPU2  | --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  -- 
+CPU3  | --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  -- 
+Tick  | 0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15 

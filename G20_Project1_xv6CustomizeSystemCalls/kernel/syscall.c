@@ -104,6 +104,18 @@ extern uint64 sys_close(void);
 extern uint64 sys_sigalarm(void);
 extern uint64 sys_sigreturn(void);
 extern uint64 sys_sigsend(void);
+extern uint64 sys_clone(void);
+extern uint64 sys_join(void);
+extern uint64 sys_msgsend(void);
+extern uint64 sys_msgrecv(void);
+extern uint64 sys_sem_init(void);
+extern uint64 sys_sem_wait(void);
+extern uint64 sys_sem_post(void);
+extern uint64 sys_forkprio(void);
+extern uint64 sys_setpriority(void);
+extern uint64 sys_getpriority(void);
+extern uint64 sys_waitx(void);
+extern uint64 sys_getpinfo(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -132,6 +144,18 @@ static uint64 (*syscalls[])(void) = {
 [SYS_sigalarm] sys_sigalarm,
 [SYS_sigreturn] sys_sigreturn,
 [SYS_sigsend] sys_sigsend,
+[SYS_clone] sys_clone,
+[SYS_join] sys_join,
+[SYS_msgsend] sys_msgsend,
+[SYS_msgrecv] sys_msgrecv,
+[SYS_sem_init] sys_sem_init,
+[SYS_sem_wait] sys_sem_wait,
+[SYS_sem_post] sys_sem_post,
+[SYS_forkprio] sys_forkprio,
+[SYS_setpriority] sys_setpriority,
+[SYS_getpriority] sys_getpriority,
+[SYS_waitx] sys_waitx,
+[SYS_getpinfo] sys_getpinfo,
 };
 
 void

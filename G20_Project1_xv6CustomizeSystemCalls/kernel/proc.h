@@ -79,6 +79,13 @@ struct trapframe {
   /* 280 */ uint64 t6;
 };
 
+struct pinfo {
+  int pid[NPROC];
+  int state[NPROC];
+  int runtime[NPROC];
+  int waittime[NPROC];
+};
+
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 #define SIGUSR1 10
@@ -87,11 +94,15 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 // Per-process state
 struct proc {
   struct spinlock lock;
+  uint rtime;                  // Time spent running
+  uint stime;                  // Time spent sleeping
+  uint retime;                 // Time spent ready to run
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state
   void *chan;                  // If non-zero, sleeping on chan
   int killed;                  // If non-zero, have been killed
+  int priority;                // User-visible scheduling metadata
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
 
@@ -115,4 +126,8 @@ struct proc {
   int active_signal;           // Signal currently being handled
   int signal_inflight;         // Non-zero while executing the handler
   struct trapframe signal_tf;  // Saved trapframe before signal delivery
+  char msg_buf[64];            // Per-process mailbox for IPC
+  int msg_flag;                // Mailbox state: 0 empty, 1 full
+  int is_thread;               // Clone/join child marker
+  uint64 thread_stack;         // User stack top passed to clone
 };

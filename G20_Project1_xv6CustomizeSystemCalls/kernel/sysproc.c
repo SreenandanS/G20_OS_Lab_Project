@@ -29,6 +29,15 @@ sys_fork(void)
 }
 
 uint64
+sys_forkprio(void)
+{
+  int priority;
+
+  argint(0, &priority);
+  return kforkprio(priority);
+}
+
+uint64
 sys_wait(void)
 {
   uint64 p;
@@ -134,4 +143,119 @@ sys_sigsend(void)
   argint(0, &pid);
   argint(1, &signum);
   return sigsend(pid, signum);
+}
+
+uint64
+sys_clone(void)
+{
+  uint64 fn, stack, arg;
+
+  argaddr(0, &fn);
+  argaddr(1, &stack);
+  argaddr(2, &arg);
+  return kclone(fn, stack, arg);
+}
+
+uint64
+sys_join(void)
+{
+  int tid;
+
+  argint(0, &tid);
+  return kjoin(tid);
+}
+
+uint64
+sys_msgsend(void)
+{
+  int pid;
+  uint64 msg_addr;
+
+  argint(0, &pid);
+  argaddr(1, &msg_addr);
+  return msgsend(pid, (char *)msg_addr);
+}
+
+uint64
+sys_msgrecv(void)
+{
+  uint64 buf_addr;
+
+  argaddr(0, &buf_addr);
+  return msgrecv((char *)buf_addr);
+}
+
+uint64
+sys_sem_init(void)
+{
+  int semid, value;
+
+  argint(0, &semid);
+  argint(1, &value);
+  return ksem_init(semid, value);
+}
+
+uint64
+sys_sem_wait(void)
+{
+  int semid;
+
+  argint(0, &semid);
+  return ksem_wait(semid);
+}
+
+uint64
+sys_sem_post(void)
+{
+  int semid;
+
+  argint(0, &semid);
+  return ksem_post(semid);
+}
+
+uint64
+sys_setpriority(void)
+{
+  int pid;
+  int priority;
+
+  argint(0, &pid);
+  argint(1, &priority);
+  return setpriority(pid, priority);
+}
+
+uint64
+sys_getpriority(void)
+{
+  int pid;
+
+  argint(0, &pid);
+  return getpriority(pid);
+}
+
+uint64
+sys_waitx(void)
+{
+  uint64 rtime;
+  uint64 wtime;
+
+  argaddr(0, &rtime);
+  argaddr(1, &wtime);
+  return waitx(rtime, wtime);
+}
+
+uint64
+sys_getpinfo(void)
+{
+  uint64 addr;
+  struct pinfo info;
+
+  argaddr(0, &addr);
+  if(getpinfo(&info) < 0)
+    return -1;
+
+  if(copyout(myproc()->pagetable, addr, (char *)&info, sizeof(info)) < 0)
+    return -1;
+
+  return 0;
 }

@@ -4,6 +4,7 @@
 # Python
 __pycache__/
 *.pyc
+.docenv/
 
 # Project 1 generated xv6 artifacts
 G20_Project1_xv6CustomizeSystemCalls/kernel/*.o
@@ -21,8 +22,8 @@ G20_Project1_xv6CustomizeSystemCalls/mkfs/mkfs
 G20_Project1_xv6CustomizeSystemCalls/.gdbinit
 
 # Project 2 build/output artifacts
-G20_Project2_2_AdvancedSchedulingAlgorithms/bin/scheduler_sim
-!G20_Project2_2_AdvancedSchedulingAlgorithms/bin/.gitkeep
-G20_Project2_2_AdvancedSchedulingAlgorithms/src/**/*.o
-G20_Project2_2_AdvancedSchedulingAlgorithms/out/*
-!G20_Project2_2_AdvancedSchedulingAlgorithms/out/.gitkeep
+G20_Project2_2/bin/scheduler_sim
+!G20_Project2_2/bin/.gitkeep
+G20_Project2_2/src/**/*.o
+G20_Project2_2/out/*
+!G20_Project2_2/out/.gitkeep

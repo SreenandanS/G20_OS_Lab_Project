@@ -14,21 +14,33 @@ def plot_with_matplotlib(rows, output_path: Path):
     import matplotlib.pyplot as plt
 
     algorithms = [row["algorithm"] for row in rows]
-    waiting = [float(row["avg_waiting"]) for row in rows]
-    turnaround = [float(row["avg_turnaround"]) for row in rows]
-    response = [float(row["avg_response"]) for row in rows]
+    metric_specs = [
+        ("avg_waiting", "Average Waiting Time", "Ticks"),
+        ("avg_turnaround", "Average Turnaround Time", "Ticks"),
+        ("avg_response", "Average Response Time", "Ticks"),
+        ("throughput", "Throughput", "Processes/Tick"),
+        ("cpu_utilization", "CPU Utilization", "Ratio"),
+        ("deadline_misses", "Deadline Misses", "Count"),
+        ("migrations", "Migrations", "Count"),
+    ]
+    palette = ["#0e4d92", "#2e8b57", "#c75b12", "#8b1e3f", "#6a4c93", "#008b8b", "#bc6c25"]
 
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
-    for axis, values, title in zip(
-        axes,
-        [waiting, turnaround, response],
-        ["Average Waiting Time", "Average Turnaround Time", "Average Response Time"],
-    ):
-        axis.bar(algorithms, values, color=["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728"][: len(algorithms)])
+    fig, axes = plt.subplots(3, 3, figsize=(16, 12))
+    axes = axes.flatten()
+
+    for axis, (metric_key, title, ylabel) in zip(axes, metric_specs):
+        values = [float(row[metric_key]) for row in rows]
+        axis.bar(algorithms, values, color=palette[: len(algorithms)])
         axis.set_title(title)
-        axis.set_ylabel("Ticks")
+        axis.set_ylabel(ylabel)
         axis.grid(axis="y", alpha=0.3)
+        axis.set_axisbelow(True)
+        for idx, value in enumerate(values):
+            axis.text(idx, value, f"{value:.2f}" if value < 100 else f"{value:.0f}",
+                      ha="center", va="bottom", fontsize=8)
 
+    axes[len(metric_specs)].axis("off")
+    axes[len(metric_specs) + 1].axis("off")
     fig.tight_layout()
     fig.savefig(output_path)
     print(f"saved {output_path}")

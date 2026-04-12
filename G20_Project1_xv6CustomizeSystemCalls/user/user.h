@@ -1,6 +1,7 @@
 #define SBRK_ERROR ((char *)-1)
 
 struct stat;
+struct pinfo;
 typedef void (*sighandler_t)(int);
 
 #define SIGUSR1 10
@@ -31,6 +32,18 @@ int uptime(void);
 int sigalarm(int, sighandler_t);
 int sigreturn(void);
 int sigsend(int, int);
+int clone(void (*fn)(void*), void *stack, void *arg);
+int join(int);
+int msgsend(int, char*);
+int msgrecv(char*);
+int sem_init(int, int);
+int sem_wait(int);
+int sem_post(int);
+int forkprio(int);
+int setpriority(int, int);
+int getpriority(int);
+int waitx(int*, int*);
+int getpinfo(struct pinfo*);
 
 // ulib.c
 int stat(const char*, struct stat*);

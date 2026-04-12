@@ -1,6 +1,6 @@
 # G20 Operating Systems Lab Projects
 
-This repository contains the two required submissions for the NSCS210/CSC211 Operating Systems Lab.
+Operating Systems Lab Project Submission for `NSCS210/CSC211`, Department of CSE.
 
 ## Team Members
 
@@ -11,54 +11,41 @@ This repository contains the two required submissions for the NSCS210/CSC211 Ope
 - Suryansh Kulshreshtha
 - T Mokshitha
 
-## Repository Layout
+## Repository Structure
 
-- `G20_Project1_xv6CustomizeSystemCalls/`: xv6-riscv customization work based on `mit-pdos/xv6-riscv`
-- `G20_Project2_2_AdvancedSchedulingAlgorithms/`: multiprocessor scheduling simulator with multiple algorithms
-- `TEAM_EXECUTION_GUIDE.md`: member-by-member ownership, branch plan, build steps, and integration rules
+- `G20_Project1_xv6CustomizeSystemCalls/`
+- `G20_Project2_2/`
 
-## Current Status
+## Project 1 Summary
 
-- Project 1 scaffolding is vendored from the xv6-riscv codebase and includes Sreenandan's signal/alarm implementation area.
-- Project 2 includes the simulator foundation, a working `custom` scheduler base, and placeholders for the remaining algorithms.
-- xv6-riscv validation is intentionally deferred until the project is built on an Ubuntu or lab Linux environment with the RISC-V toolchain.
-- Each project README is maintained alongside the code so ownership and usage stay easy to follow.
+`G20_Project1_xv6CustomizeSystemCalls` extends `xv6-riscv` with six syscall-oriented feature groups:
 
-## Quick Start
+- signals and alarms: `sigalarm`, `sigreturn`, `sigsend`
+- thread-style execution and joining: `clone`, `join`
+- mailbox-based inter-process communication: `msgsend`, `msgrecv`
+- kernel-backed synchronization primitives: `sem_init`, `sem_wait`, `sem_post`
+- process creation and priority metadata: `forkprio`, `setpriority`, `getpriority`
+- process accounting and inspection: `waitx`, `getpinfo`
 
-### Project 1
+The project includes dedicated user programs for demonstrating each feature group and a report with screenshots in the project documentation folder.
 
-Project 1 must be built against the official xv6-riscv toolchain setup in an Ubuntu or lab Linux environment. Upstream xv6-riscv expects a RISC-V newlib toolchain such as `riscv64-unknown-elf-gcc` and QEMU with `riscv64-softmmu`.
+## Project 2 Summary
 
-Typical Linux package route:
+`G20_Project2_2` implements an advanced scheduling simulator for multiprocessor systems with:
 
-- `build-essential`
-- `bc`
-- `gdb-multiarch`
-- `qemu-system-misc`
-- `gcc-riscv64-unknown-elf`
-- `binutils-riscv64-unknown-elf`
+- Multilevel Feedback Queue (`mlfq`)
+- Lottery Scheduling (`lottery`)
+- Earliest Deadline First (`edf`)
+- a custom affinity-aware multiprocessor scheduler (`custom`)
 
-Typical run:
+Additional features include workload-based evaluation, ASCII schedule visualization, CSV export, migration and deadline metrics, and graph generation for comparison.
 
-```bash
-cd G20_Project1_xv6CustomizeSystemCalls
-make qemu
-```
+## Documentation
 
-See `TEAM_EXECUTION_GUIDE.md` for the exact ownership split and workflow.
+Each project folder contains:
 
-### Project 2
-
-```bash
-cd G20_Project2_2_AdvancedSchedulingAlgorithms
-make
-./bin/scheduler_sim --algo custom --cpus 4 --input data/workloads/sample_mixed.csv --output-dir out/sample_run
-python3 scripts/plot_metrics.py out/sample_run/comparison.csv
-```
-
-If `matplotlib` is missing:
-
-```bash
-python3 -m pip install matplotlib
-```
+- source code
+- build files
+- project-specific README
+- documentation report
+- screenshots and result artifacts required for evaluation

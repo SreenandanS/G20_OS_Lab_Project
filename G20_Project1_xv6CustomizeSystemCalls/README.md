@@ -1,6 +1,8 @@
 # G20 Project 1: xv6 Customize System Calls
 
-This project extends the RISC-V version of `mit-pdos/xv6-riscv` with six feature groups distributed across the team.
+## Overview
+
+This project extends the official `mit-pdos/xv6-riscv` teaching operating system with six syscall-oriented feature groups covering process control, communication, synchronization, signals, and observability.
 
 ## Team Members
 
@@ -11,44 +13,94 @@ This project extends the RISC-V version of `mit-pdos/xv6-riscv` with six feature
 - Suryansh Kulshreshtha
 - T Mokshitha
 
-## Scope
+## Implemented Functionality
 
-- Base kernel: xv6-riscv from `mit-pdos/xv6-riscv`
-- Focus: process control, signaling, synchronization, IPC, priority, and observability
-- Current implementation wave: scaffolded RISC-V tree plus Sreenandan's signal/alarm feature area
-
-## Important Note
-
-The current development machine is macOS arm64 and does not have the official xv6-riscv toolchain installed. The upstream repository expects a RISC-V newlib toolchain such as `riscv64-unknown-elf-gcc` together with QEMU `riscv64-softmmu`. The code is organized now, but final build/run verification must happen later on Ubuntu or lab Linux with:
-
-- `build-essential`
-- `bc`
-- `gdb-multiarch`
-- `qemu-system-misc`
-- `gcc-riscv64-unknown-elf`
-- `binutils-riscv64-unknown-elf`
-
-Later validation command:
-
-```bash
-make qemu
-```
-
-## Sreenandan's Feature
-
-Sreenandan owns:
+### 1. Signals and Alarms
 
 - `sigalarm(int ticks, handler)`
 - `sigreturn()`
 - `sigsend(int pid, int signum)`
 
-These additions are designed for xv6-riscv trapframe-based delivery and are implemented inside the real kernel syscall and trap paths.
+These changes add timer-driven user handlers and user-to-user software signal delivery using the xv6 trapframe return path.
 
-## Team Split
+### 2. Thread-Style Execution
 
-- Sreenandan Shashidharan: `sigalarm`, `sigreturn`, `sigsend`
-- Sukrat Singh Kushwaha: `clone`, `join`
-- Sura Manohar Sagar: `msgsend`, `msgrecv`
-- Suraj Kumar Prajapati: `sem_init`, `sem_wait`, `sem_post`
-- Suryansh Kulshreshtha: `forkprio`, `setpriority`, `getpriority`
-- T Mokshitha: `waitx`, `getpinfo`
+- `clone(void (*fn)(void *), void *stack, void *arg)`
+- `join(int tid)`
+
+These syscalls create a lightweight worker execution path with explicit joining semantics for controlled synchronization.
+
+### 3. Mailbox IPC
+
+- `msgsend(int pid, char *msg)`
+- `msgrecv(char *buf)`
+
+Each process gets a simple kernel mailbox for bounded point-to-point message delivery.
+
+### 4. Semaphores
+
+- `sem_init(int semid, int value)`
+- `sem_wait(int semid)`
+- `sem_post(int semid)`
+
+The semaphore table is managed inside the kernel and can be used by user programs for synchronization across processes.
+
+### 5. Priority Control
+
+- `forkprio(int priority)`
+- `setpriority(int pid, int priority)`
+- `getpriority(int pid)`
+
+These syscalls support explicit priority metadata during process creation and later inspection/update.
+
+### 6. Process Accounting
+
+- `waitx(int *rtime, int *wtime)`
+- `getpinfo(struct pinfo *info)`
+
+Runtime, ready time, and process-state snapshots are exported for analysis and demonstration.
+
+## Demo Programs
+
+- `signaldemo`
+- `threadtest`
+- `ipc_demo`
+- `semdemo`
+- `prioritydemo`
+- `test_waitx`
+- `getpinfo_test`
+
+## Build and Run
+
+Install a RISC-V xv6 toolchain and QEMU, then run:
+
+```bash
+make qemu
+```
+
+From the xv6 shell, execute the demo programs directly:
+
+```text
+signaldemo
+threadtest
+ipc_demo
+semdemo
+prioritydemo
+test_waitx
+getpinfo_test
+```
+
+## Additional Improvements
+
+- integrated timer-driven signal delivery through the xv6 trap return path
+- mailbox IPC with blocking receive semantics
+- kernel semaphore table for clean synchronization demonstrations
+- process accounting data exposed to user space
+- multiple dedicated demo programs for clearer evaluation and viva discussion
+
+## Documentation
+
+Detailed analysis, demo notes, and execution screenshots are available in:
+
+- `docs/REPORT.md`
+- `screenshots/`

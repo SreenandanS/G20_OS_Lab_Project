@@ -1,0 +1,14 @@
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+hart 2 starting
+hart 1 starting
+init: starting sh
+$ prioritydemo
+prioritydemo: parent pid=3 priority=50
+prioritydemo: child pid=4 initial priority=30
+prioritydemo: child pid=4 updated priority=80
+prioritydemo: parent observes child pid=4 priority=80
+$ QEMU: Terminated
+

@@ -8,6 +8,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct pinfo;
 
 // bio.c
 void            binit(void);
@@ -81,6 +82,9 @@ void            printfinit(void);
 int             cpuid(void);
 void            kexit(int);
 int             kfork(void);
+int             kforkprio(int);
+int             kclone(uint64, uint64, uint64);
+int             kjoin(int);
 int             growproc(int);
 void            proc_mapstacks(pagetable_t);
 pagetable_t     proc_pagetable(struct proc *);
@@ -91,6 +95,10 @@ void            setkilled(struct proc*);
 int             sigalarm(int, uint64);
 int             sigreturn(void);
 int             sigsend(int, int);
+int             setpriority(int, int);
+int             getpriority(int);
+int             msgsend(int, char*);
+int             msgrecv(char*);
 void            signalcheck(struct proc*);
 void            signaltick(struct proc*);
 struct cpu*     mycpu(void);
@@ -101,6 +109,9 @@ void            sched(void);
 void            sleep(void*, struct spinlock*);
 void            userinit(void);
 int             kwait(uint64);
+int             waitx(uint64, uint64);
+int             getpinfo(struct pinfo*);
+void            update_time(void);
 void            wakeup(void*);
 void            yield(void);
 int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
@@ -185,6 +196,9 @@ void            plic_complete(int);
 void            virtio_disk_init(void);
 void            virtio_disk_rw(struct buf *, int);
 void            virtio_disk_intr(void);
+int             ksem_init(int, int);
+int             ksem_wait(int);
+int             ksem_post(int);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

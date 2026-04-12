@@ -137,7 +137,13 @@ UPROGS=\
 	$U/_mkdir\
 	$U/_rm\
 	$U/_sh\
+	$U/_threadtest\
+	$U/_ipc_demo\
+	$U/_semdemo\
+	$U/_prioritydemo\
 	$U/_signaldemo\
+	$U/_test_waitx\
+	$U/_getpinfo_test\
 	$U/_stressfs\
 	$U/_usertests\
 	$U/_grind\

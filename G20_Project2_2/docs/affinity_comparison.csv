@@ -1,0 +1,5 @@
+algorithm,cpu_count,total_ticks,completed,avg_waiting,avg_turnaround,avg_response,throughput,cpu_utilization,deadline_misses,migrations
+mlfq,4,22,6,8.33,18.67,0.00,0.2727,0.9545,0,18
+lottery,4,25,6,11.50,19.50,0.83,0.2400,0.8400,0,20
+edf,4,24,6,17.67,18.67,0.00,0.2500,0.8750,0,14
+custom,4,30,6,8.67,20.00,0.67,0.2000,0.7000,0,3
