@@ -82,6 +82,49 @@ static int pick_next_process(SchedulerState *scheduler, ProcessRuntime procs[],
   return custom_pick_next(scheduler, procs, cpu_id, now);
 }
 
+static int edf_effective_deadline(const ProcessRuntime *proc)
+{
+  if (proc->spec.deadline >= 0) {
+    return proc->spec.deadline;
+  }
+  return 0x7fffffff;
+}
+
+static int edf_is_higher_priority(const ProcessRuntime *a,
+                                  const ProcessRuntime *b)
+{
+  int da = edf_effective_deadline(a);
+  int db = edf_effective_deadline(b);
+
+  if (da != db) {
+    return da < db;
+  }
+  if (a->spec.arrival != b->spec.arrival) {
+    return a->spec.arrival < b->spec.arrival;
+  }
+  return a->spec.pid < b->spec.pid;
+}
+
+static int edf_ready_has_higher_priority(const SchedulerState *scheduler,
+                                         ProcessRuntime procs[],
+                                         int running_pid)
+{
+  const ReadyQueue *ready = &scheduler->state.edf.ready;
+  int i;
+
+  if (running_pid < 0 || ready->count == 0) {
+    return 0;
+  }
+
+  for (i = 0; i < ready->count; i++) {
+    int ready_pid = ready->items[i];
+    if (edf_is_higher_priority(&procs[ready_pid], &procs[running_pid])) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 static int time_slice_for(const SchedulerState *scheduler, const ProcessRuntime *proc)
 {
   switch (scheduler->algorithm) {
@@ -97,7 +140,7 @@ static int time_slice_for(const SchedulerState *scheduler, const ProcessRuntime 
   case ALGO_LOTTERY:
     return 2;
   case ALGO_EDF:
-    return 1;
+    return proc->remaining_in_burst > 0 ? proc->remaining_in_burst : 1;
   case ALGO_CUSTOM:
     return 4;
   case ALGO_ALL:
@@ -275,6 +318,17 @@ int run_simulation(const Workload *workload, const SimulationConfig *config,
     }
 
     scheduler_tick(&scheduler, procs, tick);
+    if (algorithm == ALGO_EDF) {
+      for (i = 0; i < config->cpu_count; i++) {
+        int running_pid = cpus[i].running_pid;
+        if (running_pid >= 0 &&
+            edf_ready_has_higher_priority(&scheduler, procs, running_pid)) {
+          scheduler_enqueue(&scheduler, procs, running_pid, i, tick, ENQUEUE_PREEMPT);
+          cpus[i].running_pid = -1;
+          cpus[i].slice_used = 0;
+        }
+      }
+    }
 
     for (i = 0; i < workload->process_count; i++) {
       if (procs[i].state == PROC_READY) {

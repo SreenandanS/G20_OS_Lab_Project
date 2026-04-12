@@ -135,3 +135,29 @@ sys_sigsend(void)
   argint(1, &signum);
   return sigsend(pid, signum);
 }
+
+uint64
+sys_sem_init(void)
+{
+  int semid, value;
+  argint(0, &semid);
+  argint(1, &value);
+  return ksem_init(semid, value);
+}
+
+uint64
+sys_sem_wait(void)
+{
+  int semid;
+  argint(0, &semid);
+  return ksem_wait(semid);
+}
+
+uint64
+sys_sem_post(void)
+{
+  int semid;
+  argint(0, &semid);
+  return ksem_post(semid);
+}
+

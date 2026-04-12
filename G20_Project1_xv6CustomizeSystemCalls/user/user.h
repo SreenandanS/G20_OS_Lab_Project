@@ -31,6 +31,9 @@ int uptime(void);
 int sigalarm(int, sighandler_t);
 int sigreturn(void);
 int sigsend(int, int);
+int sem_init(int semid, int value);
+int sem_wait(int semid);
+int sem_post(int semid);
 
 // ulib.c
 int stat(const char*, struct stat*);

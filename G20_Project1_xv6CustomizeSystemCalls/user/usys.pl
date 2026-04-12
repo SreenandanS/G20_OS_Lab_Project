@@ -45,3 +45,6 @@ entry("uptime");
 entry("sigalarm");
 entry("sigreturn");
 entry("sigsend");
+entry("sem_init");
+entry("sem_wait");
+entry("sem_post");

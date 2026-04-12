@@ -5,6 +5,15 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#define NSEM 64
+
+struct ksem {
+  struct spinlock lock;
+  int used;
+  int value;
+};
+
+struct ksem semtable[NSEM];
 
 struct cpu cpus[NCPU];
 
@@ -52,6 +61,12 @@ procinit(void)
   
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
+  for(int i = 0; i < NSEM; i++){
+    initlock(&semtable[i].lock, "ksem");
+    semtable[i].used = 0;
+    semtable[i].value = 0;
+  }
+
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
       p->state = UNUSED;
@@ -65,6 +80,68 @@ procinit(void)
       p->signal_inflight = 0;
       memset(&p->signal_tf, 0, sizeof(p->signal_tf));
   }
+}
+
+int
+ksem_init(int semid, int value)
+{
+  struct ksem *s;
+  if(semid < 0 || semid >= NSEM || value < 0)
+    return -1;
+  s = &semtable[semid];
+  acquire(&s->lock);
+  s->used = 1;
+  s->value = value;
+  wakeup(s);
+  release(&s->lock);
+  return 0;
+}
+
+int
+ksem_wait(int semid)
+{
+  struct ksem *s;
+  if(semid < 0 || semid >= NSEM)
+    return -1;
+  s = &semtable[semid];
+
+  acquire(&s->lock);
+  if(s->used == 0){
+    release(&s->lock);
+    return -1;
+  }
+
+  while(s->value == 0){
+    sleep(s, &s->lock);
+    if(s->used == 0){
+      release(&s->lock);
+      return -1;
+    }
+  }
+
+  s->value--;
+  release(&s->lock);
+  return 0;
+}
+
+int
+ksem_post(int semid)
+{
+  struct ksem *s;
+  if(semid < 0 || semid >= NSEM)
+    return -1;
+  s = &semtable[semid];
+
+  acquire(&s->lock);
+  if(s->used == 0){
+    release(&s->lock);
+    return -1;
+  }
+
+  s->value++;
+  wakeup(s);
+  release(&s->lock);
+  return 0;
 }
 
 // Must be called with interrupts disabled,
