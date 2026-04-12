@@ -6,12 +6,12 @@ This project implements a C-based multiprocessor scheduling simulator for compar
 
 ## Team Members
 
-- Sreenandan Shashidharan
-- Sukrat Singh Kushwaha
-- Sura Manohar Sagar
-- Suraj Kumar Prajapati
-- Suryansh Kulshreshtha
-- T Mokshitha
+- 24JE0701 - Sreenandan Shashidharan
+- 24JE0702 - Sukrat Singh Kushwaha
+- 24JE0703 - Sura Manohar Sagar
+- 24JE0704 - Suraj Kumar Prajapati
+- 24JE0705 - Suryansh Kulshreshtha
+- 24JE0706 - T Mokshitha
 
 ## Implemented Algorithms
 
@@ -86,7 +86,7 @@ Each run produces:
 
 ![Sample CSV](docs/sample_csv.png)
 
-### Metric Graphs: Sample Mixed Workload
+### Comparison Graph Across All Algorithms: Sample Mixed Workload
 
 ![Sample Graph](docs/sample_comparison.png)
 
@@ -98,7 +98,7 @@ Each run produces:
 
 ![Affinity CSV](docs/affinity_csv.png)
 
-### Metric Graphs: Affinity Workload
+### Comparison Graph Across All Algorithms: Affinity Workload
 
 ![Affinity Graph](docs/affinity_comparison.png)
 

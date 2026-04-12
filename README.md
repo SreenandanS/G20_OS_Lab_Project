@@ -4,12 +4,12 @@ Operating Systems Lab Project Submission for `NSCS210/CSC211`, Department of CSE
 
 ## Team Members
 
-- Sreenandan Shashidharan
-- Sukrat Singh Kushwaha
-- Sura Manohar Sagar
-- Suraj Kumar Prajapati
-- Suryansh Kulshreshtha
-- T Mokshitha
+- 24JE0701 - Sreenandan Shashidharan
+- 24JE0702 - Sukrat Singh Kushwaha
+- 24JE0703 - Sura Manohar Sagar
+- 24JE0704 - Suraj Kumar Prajapati
+- 24JE0705 - Suryansh Kulshreshtha
+- 24JE0706 - T Mokshitha
 
 ## Repository Structure
 
@@ -80,7 +80,7 @@ Additional features include workload-based evaluation, ASCII schedule visualizat
 
 ![Project 2 Sample CSV](G20_Project2_2/docs/sample_csv.png)
 
-### Sample Mixed Workload Graph
+### Sample Mixed Workload Comparison Graph Across All Algorithms
 
 ![Project 2 Sample Graph](G20_Project2_2/docs/sample_comparison.png)
 
@@ -92,7 +92,7 @@ Additional features include workload-based evaluation, ASCII schedule visualizat
 
 ![Project 2 Affinity CSV](G20_Project2_2/docs/affinity_csv.png)
 
-### Affinity Workload Graph
+### Affinity Workload Comparison Graph Across All Algorithms
 
 ![Project 2 Affinity Graph](G20_Project2_2/docs/affinity_comparison.png)
 

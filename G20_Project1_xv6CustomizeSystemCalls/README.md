@@ -6,12 +6,12 @@ This project extends the official `mit-pdos/xv6-riscv` teaching operating system
 
 ## Team Members
 
-- Sreenandan Shashidharan
-- Sukrat Singh Kushwaha
-- Sura Manohar Sagar
-- Suraj Kumar Prajapati
-- Suryansh Kulshreshtha
-- T Mokshitha
+- 24JE0701 - Sreenandan Shashidharan
+- 24JE0702 - Sukrat Singh Kushwaha
+- 24JE0703 - Sura Manohar Sagar
+- 24JE0704 - Suraj Kumar Prajapati
+- 24JE0705 - Suryansh Kulshreshtha
+- 24JE0706 - T Mokshitha
 
 ## Implemented Functionality
 
