@@ -1,5 +1,6 @@
 #include "sim.h"
-
+#define _DEFAULT_SOURCE
+#define _GNU_SOURCE
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 
 static char *trim(char *value)
 {
+  if (value == NULL) return NULL;
   char *end;
 
   while (*value != '\0' && isspace((unsigned char)*value)) {
