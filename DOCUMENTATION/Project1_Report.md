@@ -123,6 +123,15 @@ getpinfo_test
 - kernel semaphore table for synchronization experiments
 - multiple demo programs to keep each functionality easy to test and explain
 
+## Contribution
+
+- `24JE0701 - Sreenandan Shashidharan`: implemented signal and alarm support using `sigalarm`, `sigreturn`, and `sigsend`, and finalized the integrated xv6-riscv syscall extension set.
+- `24JE0702 - Sukrat Singh Kushwaha`: implemented thread-style worker creation and synchronization using `clone` and `join`, along with the corresponding demo program.
+- `24JE0703 - Sura Manohar Sagar`: implemented mailbox-based IPC using `msgsend` and `msgrecv`, along with the corresponding demo program.
+- `24JE0704 - Suraj Kumar Prajapati`: implemented kernel semaphore support using `sem_init`, `sem_wait`, and `sem_post`, along with the corresponding demo program.
+- `24JE0705 - Suryansh Kulshreshtha`: implemented process priority metadata control using `forkprio`, `setpriority`, and `getpriority`, along with the corresponding demo program.
+- `24JE0706 - T Mokshitha`: implemented process accounting and inspection support using `waitx` and `getpinfo`, and contributed the associated user-space test programs.
+
 ## Execution Screenshots
 
 ### Signal and Alarm Demonstration

@@ -82,6 +82,15 @@ On the affinity-heavy workload, the custom scheduler sharply reduces migrations 
 - readable ASCII schedule visualization in the terminal
 - multiple workloads for behavior-focused evaluation
 
+## Contribution
+
+- `24JE0701 - Sreenandan Shashidharan`: built the simulator foundation, command-line flow, shared runtime engine, reporting pipeline, and the custom affinity-aware multiprocessor scheduler.
+- `24JE0702 - Sukrat Singh Kushwaha`: contributed the Multilevel Feedback Queue scheduler and its queue-based scheduling behavior.
+- `24JE0703 - Sura Manohar Sagar`: contributed the Lottery Scheduler with ticket-based probabilistic selection.
+- `24JE0704 - Suraj Kumar Prajapati`: contributed the Earliest Deadline First scheduler for deadline-aware process selection.
+- `24JE0705 - Suryansh Kulshreshtha`: contributed workload preparation, metrics validation, and comparison-oriented test coverage across algorithms.
+- `24JE0706 - T Mokshitha`: contributed graph generation, documentation refinement, screenshot organization, and final presentation support for scheduling results.
+
 ## Screenshots
 
 ### Terminal Schedule Output: Sample Mixed Workload
