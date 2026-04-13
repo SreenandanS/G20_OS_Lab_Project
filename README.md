@@ -15,6 +15,7 @@ Operating Systems Lab Project Submission for `NSCS210/CSC211`, Department of CSE
 
 - `G20_Project1_xv6CustomizeSystemCalls/`
 - `G20_Project2_2/`
+- `DOCUMENTATION/`
 
 ## Project 1 Summary
 
